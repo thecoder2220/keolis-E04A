@@ -32,6 +32,7 @@ export class HomeComponent {
   @bindable achatsStats = [];
   @bindable currentPart = null;
   @bindable currentPage = 1;
+  @bindable lastPageNumber = 1;
   @bindable partNames;
   @bindable etsSuggestions;
   @bindable achatsQualiteStats;
@@ -261,6 +262,7 @@ export class HomeComponent {
         this.achatsStats = data.results;
         this.achatsStatsReady = true;
         this.config.totalItems = data.totalItems;
+        this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
         //this.processSumGAP()
         this.loadPartsNames();
         if (this.currentView == "Qualité") {
@@ -330,12 +332,23 @@ export class HomeComponent {
 
   setPage(num) {
     if (this.currentPage + num >= 1) this.currentPage += num;
+    this.loadAchatsStats();
   };
 
+  gotoFirstPage() {
+    this.currentPage = 1;
+    this.loadAchatsStats();
+  };
 
-  currentPageChanged(newValue, oldValue) {
+  gotoLastPage() {
+    this.currentPage = this.lastPageNumber;
+    console.log("METHODE gotoLastPage - this.currentPage="+this.currentPage);
+    this.loadAchatsStats();
+  };
+
+  /*currentPageChanged(newValue, oldValue) {
     if (newValue != oldValue) this.loadAchatsStats()
-  };
+  };*/
 
 
 
