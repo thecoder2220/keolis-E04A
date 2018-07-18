@@ -162,7 +162,7 @@
                     <nav aria-label="Page navigation example">
                       <ul class="pagination" style="margin-bottom:0px" if.bind="config.totalItems>0">
                         <li class="page-item">
-                          <a class="page-link" href="#" if.bind="currentPage>1" click.trigger="gotoFirstPage()"><i class="fa fa-step-backward" ></i></a>
+                          <a class="page-link" href="#" if.bind="currentPage>1" click.trigger="gotoFirstPage()">&nbsp;<i class="fa fa-step-backward" ></i>&nbsp;</a>
                         </li>
                         <li class="page-item">
                           <a class="page-link" href="#" if.bind="currentPage>1" click.trigger="setPage(-1)">Pr&eacute;c.</a>
@@ -180,10 +180,10 @@
                           <a class="page-link" if.bind="currentPage<lastPageNumber" href="#" click.trigger="setPage(1)">Suiv.</a>
                         </li>
                         <li class="page-item">
-                          <a class="page-link" if.bind="currentPage<lastPageNumber" href="#" click.trigger="gotoLastPage()"><i class="fa fa-step-forward" ></i></a>
+                          <a class="page-link" if.bind="currentPage<lastPageNumber" href="#" click.trigger="gotoLastPage()">&nbsp;<i class="fa fa-step-forward" ></i>&nbsp;</a>
                         </li>
                         <li class="page-item disabled">
-                          <a class="page-link" if.bind="currentPage>=lastPageNumber" href="#" click.trigger="gotoLastPage()"><i class="fa fa-step-forward" ></i></a>
+                          <a class="page-link" if.bind="currentPage>=lastPageNumber" href="#" click.trigger="gotoLastPage()">&nbsp;<i class="fa fa-step-forward" ></i>&nbsp;</a>
                         </li>
                       </ul>
                     </nav>

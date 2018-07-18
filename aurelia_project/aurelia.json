@@ -121,6 +121,11 @@
             "name": "jstree",
             "main": "dist/jstree",
             "path": "../node_modules/jstree"
+          },
+          {
+            "name": "font-awesome",
+            "path": "../node_modules/font-awesome/css",
+            "main": "font-awesome.css"
           }
         ]
       }
