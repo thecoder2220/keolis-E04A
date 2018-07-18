@@ -1,0 +1,359 @@
+<template>
+  <require from="../../resources/value-converters/number-format"></require>
+  <require from="../partView/part-view"></require>
+  <require from="../../CSS/default/style.min.css"></require>
+
+
+  <div classe="row" style="width:100%" slot="nav-content">
+      <button type="button" class="col-sm-2 btn btn-${isActive('Agrégée',currentView)}" click.trigger="setCurrentView('Agrégée')">Vue Agrégée</button>
+      <button type="button" class="col-sm-2 btn btn-${isActive('Pièce',currentView)}" click.trigger="setCurrentView('Pièce')" data-toggle="modal" data-target="#filialeModal">Vue Pièce</button>
+      <button type="button" class="col-sm-2 btn btn-${isActive('Qualité',currentView)}" click.trigger="setCurrentView('Qualité')">Vue Qualité</button>
+      <button type="button" class="col-sm-2 btn btn-primary offset-sm-3">Exporter</button>
+  </div>
+
+
+  <div slot="main-content">
+
+  <div class="row" style=" padding-top: 60px;">
+    <div class="col-sm-3" style="margin-bottom:10px">
+
+
+      <div class="card">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-lg-6" style="white-space: nowrap">Filiale(s)</div>
+            <div class="col-lg-6"><button class="btn btn-primary very-small-button" style="width:100%" data-toggle="modal" data-target="#filialeModal" click.trigger="setCurrentSuggestionType('ets')">Modifier</button></div>
+          </div>
+        </div>
+        <div style="overflow: auto; max-height:150px;">
+          <ul class="list-group list-group-flush">
+            <li repeat.for="ets of preSelected.ets" class="list-group-item" style="white-space: normal">${ets.name}</li>
+            <li if.bind="preSelected.ets.length==0" class="list-group-item" style="white-space: nowrap">Toutes les filiales</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" show.bind="preSelected.part!=null">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-lg-6" style="white-space: nowrap">Pi&egrave;ce</div>
+            <div class="col-lg-6"><button class="btn btn-primary very-small-button" style="width:100%" data-toggle="modal" data-target="#filialeModal" click.trigger="setCurrentSuggestionType('part')">Modifier</button></div>
+          </div>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">${preSelected.part.name} (${preSelected.part.id})</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="white-space: nowrap">
+          P&eacute;riode
+        </div>
+
+        <div class="card-body">
+          <form style="margin-bottom: 0px">
+            <div>
+              <div class="row">
+                <div class="col-lg-4" style="white-space: nowrap">Début</div>
+                <select class="col-lg-4" value.bind="preSelected.startDate.month">
+                  <option value="01">janvier</option>
+                  <option value="02">février</option>
+                  <option value="03">mars</option>
+                  <option value="04">avril</option>
+                  <option value="05">mai</option>
+                  <option value="06">juin</option>
+                  <option value="07">juillet</option>
+                  <option value="08">août</option>
+                  <option value="09">septembre</option>
+                  <option value="10">octobre</option>
+                  <option value="11">novembre</option>
+                  <option value="12">décembre</option>
+                </select>
+                <select class="col-lg-4" value.bind="preSelected.startDate.year">
+                  <option repeat.for="year of years" value=${year}>${year}</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div class="row">
+                <div class="col-lg-4" style="white-space: nowrap">Fin</div>
+                <select class="col-lg-4" value.bind="preSelected.endDate.month">
+                  <option value="01">janvier</option>
+                  <option value="02">février</option>
+                  <option value="03">mars</option>
+                  <option value="04">avril</option>
+                  <option value="05">mai</option>
+                  <option value="06">juin</option>
+                  <option value="07">juillet</option>
+                  <option value="08">août</option>
+                  <option value="09">septembre</option>
+                  <option value="10">octobre</option>
+                  <option value="11">novembre</option>
+                  <option value="12">décembre</option>
+                </select>
+                <select class="col-lg-4" value.bind="preSelected.endDate.year">
+                  <option repeat.for="year of years" value=${year}>${year}</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="card" show.bind="filter.part==null">
+        <div class="card-header">
+          <div style="white-space: nowrap">Quantité</div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-4" style="white-space: nowrap">Minimum</div>
+            <input type="number" class="col-lg-8" id="inlineFormInput" placeholder="Quantité" value.bind="preSelected.minQuantity">
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin: 0px">
+        <button class="col btn btn-primary small-button" click.trigger="resetFiltrage()">Remise à zéro</button>
+        <button class="col btn btn-primary small-button" click.trigger="validateFilter()">Appliquer</button>
+      </div>
+
+    </div>
+
+    <div class="col-sm-9">
+      <div class="row">
+        <div class="col-sm-12" style ="height: 400px">
+          <img src="../static/throbber.gif" show.bind="!diagramIsReady" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)"/>
+          <div id="mainDiagram1" ref="mainDiagram1" style="width: 100%; height:100%"></div>
+        </div>
+        <!--div class="col-sm-3">
+          <div class="jumbotron">
+            <center>
+              <p class="lead">Ecart moyen au prix moyen d'achat groupe</p>
+              <h5 class="display-6">${ecartMoyen | numberFormat:'0.00 %'} </h5>
+            </center>
+          </div>
+
+        </div-->
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+
+      <!--div class="row">
+        <div ref="paramStats"></div>
+      </div-->
+      <div show.bind="filter.part==null">
+        <H5>Analyse par pi&egrave;ce </H5>
+      <!--   <H5 if.bind="config.totalItems>0">(${config.totalItems} r&eacute;sultats)</H5>  -->
+      </div>
+      <!--button type="button" class="btn btn-secondary" if.bind="false">Exporter les donn&eacute;es</button-->
+
+      <div>
+
+        <div style="font-size: 90%; width: 100%">
+          <table class="table table-hover">
+            <thead class="thead-dark">
+              <tr>
+                <th colspan="6" style="background-color: transparent; border:0px; padding:0px">
+                  <div show.bind="filter.part==null">
+                    <nav aria-label="Page navigation example">
+                      <ul class="pagination" style="margin-bottom:0px" if.bind="config.totalItems>0">
+                        <li class="page-item">
+                          <a class="page-link" href="#" click.trigger="setPage(-1)">Pr&eacute;c.</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="#" if.bind="currentPage>1" click.trigger="setPage(-1)">${currentPage-1}</a>
+                        </li>
+                        <li class="page-item disabled">
+                          <a class="page-link">${currentPage}</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="#" click.trigger="setPage(1)">${currentPage + 1}</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="#" click.trigger="setPage(1)">Suiv.</a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </th>
+                <th colspan="4" style="background-color: #008094; border:0px" if.bind="currentView!='Qualité'">Manque à gagner crédible</th>
+                <th colspan="4" style="background-color: #786F64; border:0px" if.bind="currentView!='Qualité'">Manque à gagner théorique</th>
+                <th colspan="2" style="background-color: #008094; border:0px" if.bind="currentView=='Qualité'">ORI</th>
+                <th colspan="2" style="background-color: #786F64; border:0px" if.bind="currentView=='Qualité'">ORF</th>
+                <th colspan="2" style="background-color: #BE3D00; border:0px" if.bind="currentView=='Qualité'">PQE</th>
+              </tr>
+              <tr>
+                <th scope="col">R&eacute;f. Fabriquant</th>
+                <th scope="col">R&eacute;f. Kapp</th>
+                <th scope="col">Libell&eacute;</th>
+                <th scope="col">Quantit&eacute; achet&eacute;e</th>
+                <th scope="col">Prix d'achat moyen (€)</th>
+                <th scope="col"><a href="#" click.trigger="setSortField('SomMontantCalc')" class="au-target table-sort">Dépenses totales (€)</a><span if.bind="sortField=='SomMontantCalc'" class="oi oi-caret-bottom"></span></th>
+                <th scope="col" if.bind="currentView!='Qualité'" style="border-left: 1px solid #124162">
+                  <div class="hoverable">
+                    Achats optimisés (%)
+                    <div class="hoverText">Les <i>achats optimisés</i> associés au prix crédible représentent le pourcentage de pièces achetées au prix crédible dans la période sélectionnée.</div>
+                  </div>
+                </th>
+                <th scope="col" if.bind="currentView!='Qualité'"><div class="">
+                  <div class="hoverable">
+                    Prix crédible moyen (€)
+                    <div class="hoverText">Le <i>prix crédible</i> correspond au prix minimum observable le jour de la commande, pour une référence pièce fournisseur donnée, représentant au moins <b>10% des achats au niveau du Groupe</b>. Ce prix crédible est calculé sur une période de 12 moins précédent la date de commande.<br />Le <i>prix crédible moyen</i> représente la moyenne du prix crédible sur la période sélectionnée.</div>
+                  </div>
+                </th>
+                <th scope="col" if.bind="currentView!='Qualité'"><a href="#" click.trigger="setSortField('MAGPMC')" class="au-target table-sort">
+                  <div class="hoverable">
+                    Manque &agrave; Gagner cr&eacute;dible (€)
+                    <div class="hoverText">Le <i>Manque à Gagner crédible</i> (ou MAG crédible) représente la différence (en €) entre le prix payé et le prix crédible, sur l'ensemble des commandes.</div>
+                  </div>
+                  </a><span if.bind="sortField=='MAGPMC'" class="oi oi-caret-bottom"></span></th>
+                <th scope="col" if.bind="currentView!='Qualité'">
+                  <div class="hoverable">
+                    Cumul des Manques à Gagner crédible(%)
+                    <div class="hoverText">Le <i>cumul des Manque à Gagner crédible</i> représente le pourcentage de Manque à Gagner cumulé ligne par ligne par rapport au Manque à Gagner total de la/les filiale(s) sélectionnée(s) sur la période sélectionnée.<br /><br /><i>Exemple : si le cumul des Manque à Gagner crédible est de X% à la ligne N, cela signifie que l'ensemble des pièces des lignes 1 à N représente X% de Manque à Gagner crédible par rapport au Manque à Gagner total.</i></div>
+                  </div>
+                </th>
+                <th scope="col" if.bind="currentView!='Qualité'" style="border-left: 1px solid #124162">
+                  <div class="hoverable">
+                    Achats optimisés (%)
+                    <div class="hoverText">Les <i>achats optimisés</i> associés au prix minimum représentent le pourcentage de pièces achetées au prix minimum dans la période sélectionnée.</div>
+                  </div>
+                </th>
+                <th scope="col" if.bind="currentView!='Qualité'">
+                  <div class="hoverable">
+                    Prix minimum moyen (€)
+                    <div class="hoverText">Le <i>prix minimum</i> correspond au prix minimum observable sur l’ensemble des prix au catalogue le jour de la commande de la pièce.<br />Le <i>prix minimum moyen</i> représente naturellement la moyenne du prix minimum sur la période sélectionnée.</div>
+                  </div>
+                </th>
+                <th scope="col" if.bind="currentView!='Qualité'"><a href="#" click.trigger="setSortField('MAGPMT')" class="au-target table-sort">
+                  <div class="hoverable">
+                    Manque &agrave; Gagner th&eacute;orique (€)
+                    <div class="hoverText" style="margin-left:-180px">Le <i>Manque à Gagner théorique</i> (ou MAG théorique) représente la différence (en €) entre le prix payé et le prix minimum, sur l'ensemble des commandes.</div>
+                  </div>
+                </a><span if.bind="sortField=='MAGPMT'" class="oi oi-caret-bottom"></span></th>
+                <th scope="col" if.bind="currentView!='Qualité'">
+                  <div class="hoverable">
+                    Cumul des Manques à Gagner théorique (%)
+                    <div class="hoverText" style="margin-left:-230px">Le <i>cumul des Manque à Gagner théorique</i> représente le pourcentage du Manque à Gagner théorique ligne par ligne par rapport au Manque à Gagner total de la/les filiale(s) sélectionnée(s) sur la période sélectionnée.<br /><br /><i>Exemple : si le cumul des Manque à Gagner théorique est de X% à la ligne N, cela signifie que l'ensemble des pièces des lignes 1 à N représente X% de Manque à Gagner théorique par rapport au Manque à Gagner total.</i></div>
+                  </div>
+                </th>
+                
+                <th scope="col" if.bind="currentView=='Qualité'" style="border-left: 1px solid #124162">ORI <br />Quantité commandée</th>
+                <th scope="col" if.bind="currentView=='Qualité'">ORI <br />Prix d'achat moyen (€)</th>
+                <th scope="col" if.bind="currentView=='Qualité'" style="border-left: 1px solid #124162">ORF <br />Quantité commandée</th>
+                <th scope="col" if.bind="currentView=='Qualité'">ORF <br />Prix d'achat moyen (€)</th>
+                <th scope="col" if.bind="currentView=='Qualité'" style="border-left: 1px solid #124162">PQE <br />Quantité commandée</th>
+                <th scope="col" if.bind="currentView=='Qualité'">PQE <br />Prix d'achat moyen (€)</th>
+              </tr>
+            </thead>
+            <tbody class="table">
+              <tr show.bind="!achatsStatsReady && currentView!='Qualité'">
+                <td>
+                  <img src="../static/throbber.gif"/>
+                </td>
+              </tr>
+              <tr show.bind="!achatsQualiteStatsReady.length==0 && currentView=='Qualité'">
+                  <td>
+                    <img src="../static/throbber.gif"/>
+                  </td>
+                </tr>
+              <tr repeat.for="achat of achatsStats"  if.bind="currentView!='Qualité' || achat.showQuality ">
+                <td scope="col">${achat["main.LignesCommande.RefFabricant"]}</td>
+                <td scope="col">${achat["main.LignesCommande.Article"]}</td>
+                <td scope="col" ><p title.bind="partNames[achat['main.LignesCommande.RefFabricant']]">${partNames[achat["main.LignesCommande.RefFabricant"]].substring(0,15)}</p></td>
+                <td scope="col">${achat["SomQuantiteFacturee"]}</td>
+                <td scope="col">${ achat["SomMontantCalc"]  / achat["SomQuantiteFacturee"] | numberFormat:'0.0)'}</td>
+                <th scope="col"  >${achat["SomMontantCalc"] | numberFormat:'(0)'}</th>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-warning">${(1 - achat["totalPMCOptiVol"] / achat["SomQuantiteFacturee"] )* 100 | numberFormat:'0)'}%</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-warning">${achat["PMC"] | numberFormat:'0.0)'}</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-warning">${achat["MAGPMC"] | numberFormat:'0.0)'}</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-warning">${achat["MAGPMCCUMUL"] | numberFormat:'(0.0 %)'}</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-danger"> ${(1 - achat["totalPMTOptiVol"] / achat["SomQuantiteFacturee"])* 100 | numberFormat:'0)'}%</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-danger">${achat["PMT"] | numberFormat:'0.0)'}</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-danger">${achat["MAGPMT"] | numberFormat:'0.0)'}</td>
+                <td scope="col" if.bind="currentView!='Qualité'" class="table-danger">${achat["MAGPMTCUMUL"] | numberFormat:'(0.0 %)'}</td>
+
+                <td scope="col" if.bind="currentView=='Agrégée'">
+                  <a href="#" click.trigger="setCurrentPart(achat['main.LignesCommande.RefFabricant'], partNames[achat['main.LignesCommande.RefFabricant']], achat)"
+                    filter.bind="filter" class="badge badge-danger">D&eacute;tails</a>
+                </td>
+                
+                <th scope="col" if.bind="currentView=='Qualité'" class="table-warning">${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORI"]["SomQuantiteFacturee"] /achat["SomQuantiteFacturee"] | numberFormat:'(0.0 %)'}</th>
+                <th scope="col" if.bind="currentView=='Qualité'" class="table-warning">${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORI"]["AvgPrixTarif"]| numberFormat:'(0.0)'}</th>
+                <th scope="col" if.bind="currentView=='Qualité'" class="table-danger">${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORF"]["SomQuantiteFacturee"] /achat["SomQuantiteFacturee"]| numberFormat:'(0.0 % )'}</th>
+                <th scope="col" if.bind="currentView=='Qualité'" class="table-danger">${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORF"]["AvgPrixTarif"]| numberFormat:'(0.0)'}</th>
+                <th scope="col" if.bind="currentView=='Qualité'" class="table-info">${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["PQE"]["SomQuantiteFacturee"]/ achat["SomQuantiteFacturee"] | numberFormat:'(0.0 %)'}</th>
+                <th scope="col" if.bind="currentView=='Qualité'" class="table-info">${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["PQE"]["AvgPrixTarif"] | numberFormat:'(0.0)'}</th>
+
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+      <div show.bind="filter.part!=null">
+
+        <H5>D&eacute;tails des commandes</H5>
+      </div>
+
+      <part-view show.bind="filter.part!=null" filter.bind="filter"></part-view>
+
+
+
+
+
+      <div class="modal fade" id="filialeModal" tabindex="-1" role="dialog" aria-labelledby="filialeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="filialeModalLabel">Sélection ${currentSuggestionTitle}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div show.bind="currentSuggestionType!='ets'" class="modal-body">
+            <!--div class="modal-body"-->
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" value.bind="suggestValue" placeholder.bind="currentSuggestionLabel" aria-label="Recipient's username"
+                  aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" click.trigger="loadSuggestions(suggestValue,10)">Recherche</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" click.trigger="validateModal()">Valider</button>
+                </div>
+              </div>
+              <div class="container">
+                <div class="col-sm">
+                  <div class="col-sm" style="margin-bottom: 10px" show.bind="preSelectedPart!=null">
+                    <div>Sélectionnée :</div>
+                    <div>${preSelectedPart.name} (${preSelectedPart.id})</div>
+                  </div>
+                  <div class="list-group">
+                    <a href="#" repeat.for="suggestion of suggestions" class="list-group-item list-group-item-action" click.trigger="preSelectPart(suggestion.id, suggestion.name)">${suggestion.name} (${suggestion.id})</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div show.bind="currentSuggestionType=='ets'" class="modal-body">
+              <div>
+                <div style="display: flex; justify-content: space-between">
+                  <div>Rechercher : <input type="text" id="searchFiliale" /></div>
+                  <button type="button" class="btn btn-default" data-dismiss="modal" click.trigger="validateModal()">Valider</button>
+                </div>
+                <div id="multiselectTreeFiliale"></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" click.trigger="validateModal()">Valider</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</template>

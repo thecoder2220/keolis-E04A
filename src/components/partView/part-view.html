@@ -1,0 +1,197 @@
+<template>
+  <require from="../../resources/value-converters/number-format"></require>
+
+  <div class="row">
+    <div class="col-12" style="height:300px;">
+      <img src="../static/throbber.gif" show.bind="!fournisseurIsReady" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)"/>
+      <div id="fournisseurDiagram" ref="fournisseurDiagram" style="width: 100%;height:100%;"></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 10px">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination" >
+        <li class="page-item">
+          <a class="page-link" href="#" click.trigger="setPage(-1)">Pr&eacute;c.</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="#" if.bind="currentPage>1" click.trigger="setPage(-1)">${currentPage-1}</a>
+        </li>
+        <li class="page-item disabled">
+          <a class="page-link">${currentPage}</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="#" click.trigger="setPage(1)">${currentPage + 1}</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="#" click.trigger="setPage(1)">Suiv.</a>
+        </li>
+      </ul>
+    </nav>
+    <!--div>
+      Utiliser uniquement les pièces où le délai de livraison est 1 ou NC
+      <input type="checkbox">
+    </div-->
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+
+      <small>
+        <table class="table table-responsive-sm table-hover">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Filiale</th>
+              <th scope="col">R&eacute;f&eacute;rence commande</th>
+              <th scope="col">Quantit&eacute;</th>
+              <th scope="col">Fournisseur</th>
+              <th scope="col">Constructeur</th>
+              <th scope="col">Equipementier</th>
+              <th scope="col">R&eacute;ference fournisseur</th>
+              <th scope="col">Prix (€)</th>
+              <th scope="col">D&eacute;lai (jours)</th>
+              <th scope="col">Qualit&eacute;</th>
+              <th scope="col">Manque &agrave; gagner (€)</th>
+              <th scope="col">catalogue</th>
+            </tr>
+          </thead>
+
+          <tbody show.bind="!orderLinesReady">
+            <tr>
+              <td>
+                <img src="../static/throbber.gif"/>
+              </td>
+            </tr>
+          </tbody>
+          <tbody repeat.for="achat of orderLines">
+            <tr>
+              <td scope="col" class="table-info">
+                <b>${achat["DCRSALCA_norm"]}</b>
+              </td>
+              <td scope="col" class="table-info">${etablissements[achat["ETSSALCA"]].name}</td>
+              <td scope="col" class="table-info">
+                <b>${achat["NUISALCA"]}</b>
+              </td>
+              <td scope="col" class="table-info">
+                <b>${achat["QTFSALCA_norm"]}</b>
+              </td>
+              <td scope="col" class="table-info">
+                <b>${fournisseurs[achat["catalog"]["P_URI"]["FOUSBART"]]} </b>
+              </td>
+              <th scope="col" class="table-info">
+                <b>${fournisseurs[achat["catalog"]["P_URI"]["TFASBART"]]} (${achat["catalog"]["P_URI"]["TFASBART"]})</b>
+              </th>
+              <th scope="col" class="table-info">
+                <b>${achat["catalog"]["P_URI"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</b>
+              </th>
+              <td scope="col" class="table-info">
+                <b>${achat["catalog"]["P_URI"]["REFSBART"]}</b>
+              </td>
+              <td scope="col" class="table-info">
+                <b>${achat["PVFSALCA"]}</b>
+              </td>
+              <td scope="col" class="table-info">
+                <b>${achat["catalog"]["P_URI"]["DLVSBART"]}</b>
+              </td>
+              <td scope="col" class="table-info">
+                <b>${(achat["catalog"]["P_URI"]["Properties"]["KEO_PIECO"]!=null)?achat["catalog"]["P_URI"]["Properties"]["KEO_PIECO"]["VALSBAAA"]:"Inconnue"}</b>
+              </td>
+              <td scope="col" class="table-info"></td>
+          
+              <td scope="col" class="table-info">
+                <a href="#" data-toggle="modal" data-target="#exampleModalLong" class="badge badge-info" click.trigger="loadCatalogEntries(achat['DCRSALCA_norm'],achat['RFBSALCA'],achat['PVFSALCA'])">D&eacute;tails catalogue</a>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" class="table-warning">
+                <center>
+                  <i>Prix Cr&eacute;dible</i>
+                </center>
+              </td>
+              <td scope="col" class="table-warning">${fournisseurs[achat["catalog"]["P_PMC"]["FOUSBART"]]}</td>
+              <th scope="col" class="table-warning">${fournisseurs[achat["catalog"]["P_PMC"]["TFASBART"]]} (${achat["catalog"]["P_PMC"]["TFASBART"]})</th>
+              <th scope="col" class="table-warning">${achat["catalog"]["P_PMC"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</th>
+              <td scope="col" class="table-warning">${achat["catalog"]["P_PMC"]["REFSBART"]}</td>
+              <td scope="col" class="table-warning">${achat["PMC"] | numberFormat:'0.0)'}</td>
+              <td scope="col" class="table-warning">${achat["catalog"]["P_PMC"]["DLVSBART"]}</td>
+              <td scope="col" class="table-warning">${achat["catalog"]["P_PMC"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
+              <td scope="col" class="table-warning">${achat["PMC_MT"] | numberFormat:'0.0)'}</td>
+              <td scope="col"> </td>
+            </tr>
+            <tr>
+              <td colspan="4" class="table-danger">
+                <center>
+                  <i>Prix Minimal</i>
+                </center>
+              </td>
+              <td scope="col" class="table-danger">${fournisseurs[achat["catalog"]["P_PMT"]["FOUSBART"]]} </td>
+              <th scope="col" class="table-danger">${fournisseurs[achat["catalog"]["P_PMT"]["TFASBART"]]} (${achat["catalog"]["P_PMT"]["TFASBART"]})</th>
+              <th scope="col" class="table-danger">${achat["catalog"]["P_PMT"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</th>
+              <td scope="col" class="table-danger">${achat["catalog"]["P_PMT"]["REFSBART"]}</td>
+              <td scope="col" class="table-danger">${achat["PMT"] | numberFormat:'0.0)'}</td>
+              <td scope="col" class="table-danger">${achat["catalog"]["P_PMT"]["DLVSBART"]}</td>
+              <td scope="col" class="table-danger">${achat["catalog"]["P_PMT"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
+              <td scope="col" class="table-danger">${achat["PMT_MT"] | numberFormat:'0.0)'}</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </small>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Entr&eacute;es du catalogue</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <small>
+            <table class="table table-responsive-sm table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Libellé</th>
+                  <th scope="col">Fournisseur</th>
+                  <th scope="col">Constructeur</th>
+                  <th scope="col">Equipementier</th>
+                  <th scope="col">R&eacute;f. fournisseur</th>
+                  <th scope="col">Prix (€)</th>
+                  <th scope="col">Qualit&eacute;</th>
+                  <th scope="col">Délai de livraison (jours)</th>
+                  <th scope="col">Quantité achetée au fournisseur par le groupe</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr repeat.for="achat of catalogEntries">
+                  <td scope="col" ><p title.bind="achat['INTSBART']">${achat['INTSBART'].substring(0,15)}</p></td>
+                  <td scope="col">${fournisseurs[achat["FOUSBART"]]}</td>
+                  <td scope="col">${fournisseurs[achat["TFASBART"]]}</td>
+                  <td scope="col">${achat["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</td>
+                  <td scope="col">${achat["REFSBART"]}</td>
+                  <td scope="col">${achat["PATSBART"]}</td>
+                  <td scope="col">${achat["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
+                  <td scope="col">${(achat["DLVSBART_norm"]!=0)?achat["DLVSBART_norm"]:"NC"}</td>
+                  <td scope="col">
+                    <span  title.bind="getTopThreeNames(topBuyers[achat['GRPSBART']])" if.bind="credibles.fou[achat['GRPSBART'] + '#' + achat['REFSBART']  ]">
+                      ${credibles.fou[achat['GRPSBART'] + '#' + achat['REFSBART'] ].orders} (${credibles.fou[achat['GRPSBART'] + '#' + achat['REFSBART'] ].ratio}%)</span>
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
+          </small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,147 @@
+body{
+	margin:40px;
+	font-size:14px
+}
+
+small{
+	font-size:90%
+}
+
+.btn{
+	border-radius : 0
+}
+
+.modal-content{
+	border-radius : 0
+}
+
+.jumbotron{
+	border-radius : 0
+}
+
+
+.textCard {
+    margin-left : 5px
+}
+
+
+.form-control{
+	border-radius : 0
+}
+
+.card{
+	border-radius : 0;
+	margin-bottom : 10px
+}
+
+.page-item:last-child .page-link{
+	border-radius : 0
+}
+
+.page-item:first-child .page-link{
+	border-radius : 0
+}
+
+.table td {
+  vertical-align: middle;
+  padding : 0.5rem;
+  text-align : center;
+}
+
+.table thead th {
+  vertical-align: middle;
+  text-align : center;
+}
+
+.table th {
+  vertical-align: middle;
+  padding : 0.5rem;
+  text-align : center;
+}
+.table-info{
+	background-color : white
+
+}
+
+.table-danger{
+	background-color : #f2f1f0;
+	#opacity : 0.5
+	
+}
+
+.table-hover .table-danger:hover{
+	#background-color : #f7ded1;
+	
+}
+
+.table-warning{
+	background-color : #e7f2f9;
+	#opacity : 0.5
+	
+}
+
+.table-hover .table-warning:hover{
+	background-color : #e7f2f9;
+	
+}
+
+.btn-primary {
+    background-color: #005F7D;
+    border-color: #005F7D;
+}
+
+.btn-primary:hover {
+    background-color: #005F7D;
+    border-color: #005F7D;
+	opacity : 0.9
+}
+
+.btn-danger{
+	background-color: #BE3D00;
+    border-color: #BE3D00;
+}
+.btn-danger:hover{
+	background-color: #BE3D00;
+    border-color: #BE3D00;
+	opacity : 0.9
+}
+
+.form-group .row{
+    margin-right: -20px;
+    margin-left: -20px;
+}
+
+
+.form-control{
+	#border-color:#005F7D
+}
+
+.table .thead-dark th {
+    color: #fff;
+    background-color: #005F7D;
+    border-color: #005F7D;
+}
+
+a.table-sort{
+	color :white;
+	text-decoration: underline;
+}
+
+
+
+.badge {
+    display: inline-block;
+    padding: 0.5em 0.8em;
+    font-size: 85%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius : 0
+}
+@media (min-width: 576px){
+	.jumbotron {
+		padding: 2rem 1rem;
+	}
+}

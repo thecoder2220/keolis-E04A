@@ -1,0 +1,89 @@
+<template>
+  <div slot="main-content">
+  <div class="container" style="padding-top: 60px;">
+    <div class="row">
+      <div class="center-form panel col-md-6">
+        <div class="panel-body">
+          <h2 class="text-center">Log in</h2>
+          <form method="post" name="loginForm">
+            <div class="form-group has-feedback">
+              <input class="form-control input-lg" type="text" name="email" value.bind="username" placeholder="Login" required autofocus>
+              <span class="ion-at form-control-feedback"></span>
+            </div>
+
+            <div class="form-group has-feedback">
+              <input class="form-control input-lg" type="password" name="password" value.bind="password" placeholder="Mot de passe" required>
+              <span class="ion-key form-control-feedback"></span>
+            </div>
+
+            <button type="submit" click.delegate="authenticate()" class="btn btn-lg  btn-block btn-success">Se connecter</button>
+
+            <br/>
+
+
+
+            <p class="text-center text-muted">
+              <small>Vous avez des difficultés à vous connecter?
+                <a href="/#/signup" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">Inscription</a>
+              </small>
+            </p>
+            <p class="text-center text-muted">
+              <small>
+                  Smart Data Pieces ${version.maj}.${version.min}.${version.correctif}, build du ${version.jour}/${version.mois}/${version.annee}
+              </small>
+            </p>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Demande de création de compte</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+           <H6>Veuillez vous rapprocher de votre correspondant en filiale.</H6> 
+          <!--
+          <form>
+            <div class="form-group">
+              <label for="recipient-name" class="col-form-label">Prénom :</label>
+              <input type="text" class="form-control" id="recipient-name" value.bind="accountDetails.firsname">
+            </div>
+            <div class="form-group">
+                <label for="recipient-name" class="col-form-label">Nom :</label>
+                <input type="text" class="form-control" id="recipient-name" value.bind="accountDetails.lastname">
+              </div>
+              <div class="form-group">
+                  <label for="recipient-name" class="col-form-label" value.bind="accountDetails.email">Mél :</label>
+                  <input type="text" class="form-control" id="recipient-name">
+                </div>
+                <div class="form-group">
+                    <label for="recipient-name" class="col-form-label" value.bind="accountDetails.ets">Filiale :</label>
+                    <input type="text" class="form-control" id="recipient-name">
+                  </div>
+          </form>
+        -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+         <!-- <button type="button" class="btn btn-primary" data-dismiss="modal" click.trigger="register()">Envoyer demande</button>-->
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+</template>

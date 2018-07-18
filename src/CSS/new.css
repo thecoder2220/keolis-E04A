@@ -1,0 +1,221 @@
+body{
+	margin:40px;
+	font-size:14px
+}
+
+small{
+	font-size:90%
+}
+
+.btn{
+	border-radius : 0
+}
+
+.modal-content{
+	border-radius : 0
+}
+
+.jumbotron{
+	border-radius : 0
+}
+
+.card-text {
+    margin-left: 5px
+}
+
+.small-button {
+    padding: 4px;
+    margin: 2px;
+    font-size: 90%;
+    font-weight: 700;
+}
+
+.very-small-button {
+    margin: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 85%;
+    font-weight: 700;
+}
+
+.form-control{
+	border-radius : 0
+}
+
+.card{
+	border-radius : 0;
+	margin-bottom : 10px
+}
+
+div.hidden {
+    display : none
+}
+
+.page-item:last-child .page-link{
+	border-radius : 0
+}
+
+.page-item:first-child .page-link{
+	border-radius : 0
+}
+
+.page-link {
+    color: #005F7D;
+}
+
+.page-item.disabled .page-link{
+    color: #e9ecef;
+}
+
+.table td {
+  vertical-align: middle;
+  padding : 0.5rem;
+  text-align : center;
+}
+
+.table thead th {
+  vertical-align: middle;
+  text-align : center;
+}
+
+.table th {
+  vertical-align: middle;
+  padding : 0.5rem;
+  text-align : center;
+}
+.table-info{
+	background-color : white
+
+}
+
+.table-hover .table-info:hover{
+	background-color : rgba(0,0,0,0.01);
+	
+}
+
+.table-danger {
+	background-color : rgba(120,110,100,0.3);
+    color : black
+}
+
+.table-hover .table-danger:hover {
+	background-color : rgba(120,110,100,0.3);
+    color : black
+}
+
+
+.table-warning {
+	background-color : rgba(0,95,125,0.3);
+	color : black
+}
+
+.table-hover .table-warning:hover {
+	background-color : rgba(0,95,125,0.3);
+	color : black
+}
+
+.table-info {
+	background-color : rgba(190,61,0,0.3);
+	color : black
+}
+
+.table-hover .table-info:hover {
+	background-color : rgba(190,61,0,0.3);
+	color : black
+}
+
+.table tbody + tbody {
+    border-top: 2px solid #117a8b;
+}
+
+.btn-primary {
+    background-color: #005F7D;
+    border-color: #005F7D;
+}
+
+.btn-primary:hover {
+    background-color: #005F7D;
+    border-color: #005F7D;
+	opacity : 0.9
+}
+
+.btn-danger{
+	background-color: #BE3D00;
+    border-color: #BE3D00;
+}
+.btn-danger:hover{
+	background-color: #BE3D00;
+    border-color: #BE3D00;
+	opacity : 0.9
+}
+
+.form-group .row{
+    margin-right: -20px;
+    margin-left: -20px;
+}
+
+
+.form-control{
+	#border-color:#005F7D
+}
+
+.table .thead-dark th {
+    color: #fff;
+    background-color: #005F7D;
+    border-color: #005F7D;
+}
+
+a.table-sort{
+	color :white;
+	text-decoration: underline;
+}
+
+.hoverable {
+    position: relative
+}
+
+.hoverText {
+    z-index: 30;
+    width: 300px;
+    height: auto;
+    left: 50%;
+    bottom: 100%;
+    margin-left: -150px;
+    position: absolute;
+    background-color: rgba(0,0,0,0.75);
+    color: white;
+    display: none;
+    font-size: 12px;
+    font-weight: normal;
+    padding: 10px;
+}
+
+.hoverable:hover .hoverText {
+    display: block;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5em 0.8em;
+    font-size: 85%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius : 0
+}
+
+.badge-secondary {
+    color: #fff;
+    background-color: #005F7D;
+    border-color: #005F7D;
+}
+
+@media (min-width: 576px){
+	.jumbotron {
+		padding: 2rem 1rem;
+	}
+}
