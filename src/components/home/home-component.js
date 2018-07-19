@@ -25,7 +25,7 @@ export class HomeComponent {
   @bindable currentSuggestionLabel = "Nom ou identifiant de la filiale";
   @bindable currentSuggestionTitle = "Filiale(s)";
   @bindable sortField = "MAGPMC";
-  
+
   @bindable diagramIsReady = true;
   @bindable achatsStatsReady = true;
   @bindable achatsQualiteStatsReady = true;
@@ -57,13 +57,11 @@ export class HomeComponent {
   };
 
   @bindable state = 0;
-
-
+  achatsStatsForExport = [];
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
   /* ******************************************************************************************************************* */
-
 
 
   constructor(http, Echarts, EventAggregator) {
@@ -83,16 +81,31 @@ export class HomeComponent {
     this.ea = EventAggregator;
 
     this.years = [];
-    for(var i=(new Date()).getFullYear(); i>1999; i--) {
+    for (var i = (new Date()).getFullYear(); i > 1999; i--) {
       this.years.push(i.toString());
     }
 
     this.loadUserProfile();
-    
+
     this.resetDate();
     this.filter = this.preSelected;
   };
 
+  displayDownloadFile = (blob, filename = {}) => {
+    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+      window.navigator.msSaveBlob(blob, filename);
+    }
+    else {
+      const urlFile = window.URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = urlFile;
+      tempLink.setAttribute('download', filename);
+      tempLink.setAttribute('target', '_blank');
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+    }
+  }
 
   loadUserProfile() {
     this.http.fetch('/v1/resources/login', {
@@ -100,16 +113,14 @@ export class HomeComponent {
         'Content-Type': 'application/json'
       },
       method: 'get'
+    }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Profile loaded"));
+      this.preSelected.ets = (data.ets != null) ? [data.ets] : [];
+      this.filter = this.preSelected;
+      this.currentPage = 1;
+      this.loadAchatsStats();
+      this.loadEcartMoyen();
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log(data, "Profile loaded"));
-        this.preSelected.ets = (data.ets != null) ? [data.ets] : [];
-        this.filter = this.preSelected;
-        this.currentPage = 1;
-        this.loadAchatsStats();
-        this.loadEcartMoyen();
-      })
   };
 
 
@@ -132,7 +143,7 @@ export class HomeComponent {
       this.preSelected.part = null;
       var oldView = this.currentView;
       this.currentView = viewName;
-      if(oldView != "Qualité") {
+      if (oldView != "Qualité") {
         this.refresh();
       }
     }
@@ -141,7 +152,7 @@ export class HomeComponent {
       if (this.currentView == "Pièce") {
         this.setCurrentPart(null, null)
       }
-      
+
       if (this.currentView == "Agrégée") {
         this.currentView = viewName
         this.loadQualityStats();
@@ -150,7 +161,7 @@ export class HomeComponent {
         this.refresh();
       }
     }
-    
+
     else if (viewName == "Pièce") {
       this.setCurrentSuggestionType('part')
       this.currentView = viewName
@@ -159,8 +170,8 @@ export class HomeComponent {
 
 
   refresh() {
-   //if (this.currentView == "Agrégée" || this.currentView == "Qualité") {
-    if(this.currentView == "Pièce") {
+    //if (this.currentView == "Agrégée" || this.currentView == "Qualité") {
+    if (this.currentView == "Pièce") {
       this.ea.publish('partChanged', {message: 'Part selection changed'});
     }
     this.achatsStats.slice(0);
@@ -175,7 +186,7 @@ export class HomeComponent {
     var me = this;
     $.ajax({
       url: "../static/Consolidation_filiales.csv",
-      success: function(data) {
+      success: function (data) {
         me.initFilialesData(data, me);
       }
     });
@@ -184,11 +195,9 @@ export class HomeComponent {
   };
 
 
-
   /* ********************************************************************************************************************* */
   /* ****************************************************** Filters ****************************************************** */
   /* ********************************************************************************************************************* */
-
 
 
   validateFilter() {
@@ -225,11 +234,9 @@ export class HomeComponent {
   };
 
 
-
   /* ******************************************************************************************************************** */
   /* ********************************************** Tableau Agrégé/Qualité ********************************************** */
   /* ******************************************************************************************************************** */
-
 
 
   loadAchatsStats() {
@@ -254,21 +261,19 @@ export class HomeComponent {
           'Content-Type': 'application/json'
         },
         method: 'get'
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log(data, "Data achats loaded"));
-        this.currentUser = data.currentUser;
-        this.achatsStats = data.results;
-        this.achatsStatsReady = true;
-        this.config.totalItems = data.totalItems;
-        this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
-        //this.processSumGAP()
-        this.loadPartsNames();
-        if (this.currentView == "Qualité") {
-          this.loadQualityStats();
-        }
-      })
+      }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data achats loaded"));
+      this.currentUser = data.currentUser;
+      this.achatsStats = data.results;
+      this.achatsStatsReady = true;
+      this.config.totalItems = data.totalItems;
+      this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
+      //this.processSumGAP()
+      this.loadPartsNames();
+      if (this.currentView == "Qualité") {
+        this.loadQualityStats();
+      }
+    })
   };
 
 
@@ -297,16 +302,14 @@ export class HomeComponent {
         },
         method: 'post',
         body: json(parts)
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log(data, "Data quality loaded"));
-        this.achatsQualiteStats = data;
-        this.achatsQualiteStatsReady = true;
-        for (var achat of this.achatsStats) {
-          achat.showQuality = this.showQualityLine(achat);
-        }
-      })
+      }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data quality loaded"));
+      this.achatsQualiteStats = data;
+      this.achatsQualiteStatsReady = true;
+      for (var achat of this.achatsStats) {
+        achat.showQuality = this.showQualityLine(achat);
+      }
+    })
   };
 
 
@@ -342,14 +345,12 @@ export class HomeComponent {
 
   gotoLastPage() {
     this.currentPage = this.lastPageNumber;
-    console.log("METHODE gotoLastPage - this.currentPage="+this.currentPage);
     this.loadAchatsStats();
   };
 
   /*currentPageChanged(newValue, oldValue) {
-    if (newValue != oldValue) this.loadAchatsStats()
-  };*/
-
+   if (newValue != oldValue) this.loadAchatsStats()
+   };*/
 
 
   /* ********************************************************************************************************************* */
@@ -357,10 +358,9 @@ export class HomeComponent {
   /* ********************************************************************************************************************* */
 
 
-
   setCurrentPart(partRef, name, ligneCommande) {
     console.log.apply(console, this.logger.log(null, "Changement piece :", name, '(' + partRef + ')'));
-    if(this.filter.part==null || this.filter.part.id != partRef) {
+    if (this.filter.part == null || this.filter.part.id != partRef) {
       if (partRef != null && partRef != "") {
         this.filter.part = {
           id: partRef,
@@ -404,12 +404,10 @@ export class HomeComponent {
       },
       method: 'post',
       body: json(query)
+    }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data part names loaded"));
+      this.partNames = data;
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log(data, "Data part names loaded"));
-        this.partNames = data;
-      })
   };
 
 
@@ -419,21 +417,20 @@ export class HomeComponent {
         'Content-Type': 'application/json'
       },
       method: 'get'
+    }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log({
+        'dataLoaded': data,
+        'filters': filter
+      }, "Data pieces loaded"));
+      this.suggestions = data
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log({'dataLoaded':data, 'filters': filter}, "Data pieces loaded"));
-        this.suggestions = data
-      })
     return promise;
   };
-
 
 
   /* ******************************************************************************************************************** */
   /* ****************************************************** Modals ****************************************************** */
   /* ******************************************************************************************************************** */
-
 
 
   setCurrentSuggestionType(suggestType) {
@@ -454,7 +451,9 @@ export class HomeComponent {
 
 
   setCurrentETS(etsRef, name) {
-    if(this.preSelectedFiliales.filter(function(item){ return item.id == etsRef}).length ==0) {
+    if (this.preSelectedFiliales.filter(function (item) {
+        return item.id == etsRef
+      }).length == 0) {
       if (etsRef != null && etsRef != "")
         this.preSelectedFiliales.push({
           id: etsRef,
@@ -481,32 +480,43 @@ export class HomeComponent {
       // Code finance ; ID Qualiac ; ID WINATEL ; Filiale ; Secteur ; DR
       var rowCells = allRows[singleRow].split(';');
 
-      if(rowCells[1] && rowCells[1] != "#N/A" && rowCells[1] != "NA" && rowCells[5] != "DR") {
-        if(mySources[rowCells[5]] == undefined) {
+      if (rowCells[1] && rowCells[1] != "#N/A" && rowCells[1] != "NA" && rowCells[5] != "DR") {
+        if (mySources[rowCells[5]] == undefined) {
           mySources[rowCells[5]] = {};
         }
-        if(mySources[rowCells[5]][rowCells[4]] == undefined) {
+        if (mySources[rowCells[5]][rowCells[4]] == undefined) {
           mySources[rowCells[5]][rowCells[4]] = [];
         }
-        mySources[rowCells[5]][rowCells[4]].push({'IDQualiac': rowCells[1], 'filiale': rowCells[3]});
+        mySources[rowCells[5]][rowCells[4]].push({
+          'IDQualiac': rowCells[1],
+          'filiale': rowCells[3]
+        });
       }
-    };
+    }
+    ;
 
     // Mise en forme des données
     var myData = [];
     var listDR = Object.keys(mySources);
-    for(var DR in listDR) {
+    for (var DR in listDR) {
       var actDR = mySources[listDR[DR]];
       var childrenDR = [];
       var listSecteur = Object.keys(actDR);
-      for(var secteur in listSecteur) {
+      for (var secteur in listSecteur) {
         var actSecteur = actDR[listSecteur[secteur]];
         var childrenSecteur = [];
-        for(var filiale=0 ; filiale<actSecteur.length ; filiale++) {
-          if(actSecteur[filiale]['IDQualiac'] != '170')
-            childrenSecteur.push({'text': actSecteur[filiale]['filiale'], 'id': actSecteur[filiale]['IDQualiac']});
+        for (var filiale = 0; filiale < actSecteur.length; filiale++) {
+          if (actSecteur[filiale]['IDQualiac'] != '170')
+            childrenSecteur.push({
+              'text': actSecteur[filiale]['filiale'],
+              'id': actSecteur[filiale]['IDQualiac']
+            });
           else
-          childrenSecteur.push({'text': actSecteur[filiale]['filiale'], 'state': {'selected': true}, 'id': actSecteur[filiale]['IDQualiac']});
+            childrenSecteur.push({
+              'text': actSecteur[filiale]['filiale'],
+              'state': {'selected': true},
+              'id': actSecteur[filiale]['IDQualiac']
+            });
         }
         var newSecteur = {'text': listSecteur[secteur], 'children': childrenSecteur};
         childrenDR.push(newSecteur);
@@ -514,7 +524,11 @@ export class HomeComponent {
       var newDR = {'text': listDR[DR], 'children': childrenDR};
       myData.push(newDR);
     }
-    myData = {'text': 'Toutes les filiales', 'state': {'opened': true, 'selected': true}, 'children': myData};
+    myData = {
+      'text': 'Toutes les filiales',
+      'state': {'opened': true, 'selected': true},
+      'children': myData
+    };
     me.initMultiSelectTree(myData, me);
   };
 
@@ -523,8 +537,8 @@ export class HomeComponent {
     // Création modal filiale
     $('#multiselectTreeFiliale').jstree({
       'plugins': ['search', 'checkbox'],
-      'core' : {
-        'data' : myData,
+      'core': {
+        'data': myData,
         "themes": {
           "icons": false,
           "dots": false
@@ -545,19 +559,21 @@ export class HomeComponent {
       var objects = data.instance.get_selected(true);
 
       var find = false;
-      for(var obj=0 ; obj<objects.length && !find ; obj++) {
-        if(objects[obj]['text'] == "Toutes les filiales") {
+      for (var obj = 0; obj < objects.length && !find; obj++) {
+        if (objects[obj]['text'] == "Toutes les filiales") {
           find = true;
         }
       }
 
-      if(find) {
+      if (find) {
         me.preSelectedFiliales = [];
       } else {
-        var leaves = $.grep(objects, function (o) { return data.instance.is_leaf(o) });
-        
+        var leaves = $.grep(objects, function (o) {
+          return data.instance.is_leaf(o)
+        });
+
         me.preSelectedFiliales = [];
-        for(var leave in leaves) {
+        for (var leave in leaves) {
           me.setCurrentETS(leaves[leave]['id'], leaves[leave]['text']);
         }
       }
@@ -568,20 +584,19 @@ export class HomeComponent {
 
   validateModal() {
     console.log.apply(console, this.logger.log(null, "Modal validated"));
-    if(this.currentSuggestionType=='ets') {
+    if (this.currentSuggestionType == 'ets') {
       this.preSelected.ets = this.preSelectedFiliales;
     } else {
       var load = this.preSelected.part == null;
       this.preSelected.part = this.preSelectedPart;
-      if(load) {
+      if (load) {
         this.validateFilter();
       }
     }
   };
 
 
-  preSelectPart(partRef, name)
-  {
+  preSelectPart(partRef, name) {
     this.preSelectedPart = {id: partRef, name: name};
   };
 
@@ -601,21 +616,20 @@ export class HomeComponent {
         'Content-Type': 'application/json'
       },
       method: 'get'
+    }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log({
+        'dataLoaded': data,
+        'filters': filter
+      }, "Data filtered filiales loaded"));
+      this.suggestions = data;
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log({'dataLoaded': data, 'filters': filter}, "Data filtered filiales loaded"));
-        this.suggestions = data;
-      })
     return promise;
   };
-
 
 
   /* ********************************************************************************************************************** */
   /* ************************************************** Graph and calcul ************************************************** */
   /* ********************************************************************************************************************** */
-
 
 
   loadEcartMoyen() {
@@ -637,13 +651,11 @@ export class HomeComponent {
         method: 'get'
 
 
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log.apply(console, this.logger.log(data, "Data ecart moyen loaded"));
-        this.ecartMoyen = data.ratio;
+      }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data ecart moyen loaded"));
+      this.ecartMoyen = data.ratio;
 
-      })
+    })
   };
 
 
@@ -664,7 +676,7 @@ export class HomeComponent {
     }
   };
 
-  
+
   loadYearStats() {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
@@ -686,23 +698,21 @@ export class HomeComponent {
           'Content-Type': 'application/json'
         },
         method: 'get'
-      })
-      .then(response => response.json())
-      .then(data => {
-        var axisLabels = data.xAxis.data;
-        for(var i=0 ; i<axisLabels.length ; i++) {
-          var date = axisLabels[i];
-          axisLabels[i] = date.substring(8, 10) + '/' + date.substring(5, 7) + '/' + date.substring(0, 4);
-        }
-        console.log.apply(console, this.logger.log(data, "Setup year chart"));
-        this.diagramIsReady = true;
-        $("div#mainDiagram1").removeClass('hidden');
+      }).then(response => response.json()).then(data => {
+      var axisLabels = data.xAxis.data;
+      for (var i = 0; i < axisLabels.length; i++) {
+        var date = axisLabels[i];
+        axisLabels[i] = date.substring(8, 10) + '/' + date.substring(5, 7) + '/' + date.substring(0, 4);
+      }
+      console.log.apply(console, this.logger.log(data, "Setup year chart"));
+      this.diagramIsReady = true;
+      $("div#mainDiagram1").removeClass('hidden');
 
-        this.myChart = Echarts.init(this.mainDiagram1);
-        this.myChart.setOption(data);
-        this.myChart.resize();
-        PLATFORM.global.addEventListener("resize", this.resizeEventHandler.bind(this));
-      })
+      this.myChart = Echarts.init(this.mainDiagram1);
+      this.myChart.setOption(data);
+      this.myChart.resize();
+      PLATFORM.global.addEventListener("resize", this.resizeEventHandler.bind(this));
+    })
   };
 
 
@@ -713,37 +723,35 @@ export class HomeComponent {
   };
 
 
-
   /* ********************************************************************************************************************* */
   /* ***************************************************** Utilities ***************************************************** */
   /* ********************************************************************************************************************* */
 
 
-
   sendTracking(action) {
     /*   let current = new Date()
 
-       let pwik = "https://piwik-int.keolis.com/piwik/piwik.php?"
-       pwik += "action_name=" + encodeURI(action)
-       pwik +=  "&idsite=22&rec=1"
-       pwik += "&r=807717"
-       pwik += "&uid=" + this.currentUser
-       pwik += "&h="+current.getHours()+"&m="+current.getMinutes()+"&s="+ current.getSeconds()
-       pwik += "&_id=80cca9c11b29e837"
-       pwik += "&send_image=0&cookie=1"
-       pwik += "&url=" + encodeURI("https://10.50.138.2:8010/#/home/" + action )
+     let pwik = "https://piwik-int.keolis.com/piwik/piwik.php?"
+     pwik += "action_name=" + encodeURI(action)
+     pwik +=  "&idsite=22&rec=1"
+     pwik += "&r=807717"
+     pwik += "&uid=" + this.currentUser
+     pwik += "&h="+current.getHours()+"&m="+current.getMinutes()+"&s="+ current.getSeconds()
+     pwik += "&_id=80cca9c11b29e837"
+     pwik += "&send_image=0&cookie=1"
+     pwik += "&url=" + encodeURI("https://10.50.138.2:8010/#/home/" + action )
 
-       this.http.fetch(pwik, {
-         headers: {
+     this.http.fetch(pwik, {
+     headers: {
 
-         },
-         method: 'get'
-       })*/
+     },
+     method: 'get'
+     })*/
   };
 
 
   getStartDate() {
-    if(this.filter.startDate != null) {
+    if (this.filter.startDate != null) {
       return this.filter.startDate.year + '-' + this.filter.startDate.month + '-01';
     }
     return "";
@@ -751,7 +759,7 @@ export class HomeComponent {
 
 
   getEndDate() {
-    if(this.filter.endDate != null) {
+    if (this.filter.endDate != null) {
       return this.filter.endDate.year + '-' + this.filter.endDate.month + '-' + (new Date(this.filter.endDate.year, this.filter.endDate.month, 0).getDate());
     }
     return "";
@@ -759,7 +767,179 @@ export class HomeComponent {
 
 
   getSpacedNumber(nombre) {
-    var nbrWithSpaces=nombre.toString().replace(/(\d)(?=(\d{3})+\b)/g,'$1 ');
+    var nbrWithSpaces = nombre.toString().replace(/(\d)(?=(\d{3})+\b)/g, '$1 ');
     return nbrWithSpaces;
   };
+
+  // Bouton d'export des données MAG pour la filiale de l'user connecté
+  exportUserSubsidiaryMAGData() {
+    console.log('début exécution exportUserSubsidiaryMAGData')
+    var dataToStore = {};
+    dataToStore.data = [];
+    dataToStore.lineDelimiter = '\n';
+    dataToStore.columnDelimiter = ';';
+    debugger;
+    var interventions = this.achatsStats;
+    var storeData = {};
+    this.http.fetch('/v1/resources/MAGAggregates?rs:format=csv'
+      , {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'get'
+      }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
+      dataToStore.data.push(storeData);
+    })
+    /*  exemple
+     if(interventions == null || !interventions.length) { return; }
+     for(var intervention in interventions) {
+     var storeData = {};
+     storeData['num_intervention'] = interventions[intervention]['num_intervention'];
+     storeData['date_intervention'] = interventions[intervention]['date_intervention'];
+     storeData['id_piece'] = interventions[intervention]['id_piece'];
+     storeData['libelle'] = interventions[intervention]['libelle'];
+     storeData['quantite_piece'] = interventions[intervention]['quantite_piece'];
+     storeData['prix_piece'] = interventions[intervention]['prix_piece'];
+     storeData['montant_total'] = interventions[intervention]['montant_total'];
+     dataToStore.data.push(storeData);
+     }
+     */
+
+    var csv = this.convertArrayOfObjectsToCSV(dataToStore);
+    if (csv == null) return;
+
+    var filename = this.typeVehiculeVehicule.replace(/ /i, '_') + '_' + this.idVehicule + '.csv';
+    if (!csv.match(/^data:text\/csv/i)) {
+      csv = 'data:text/csv;charset=utf-8,' + csv;
+    }
+    var data = encodeURI(csv);
+    var link = document.createElement('a');
+    link.setAttribute('href', data);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Bouton d'export des données MAG pour la filiale de l'user connecté
+  exportFromMAGDatatable() {
+    console.log('début exécution exportFromMAGDatatable')
+
+    debugger;
+    this.achatsStats = [];
+    const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
+      return "&rs:ets=" + item.id;
+    }).join("") : ""
+    const startDate = this.getStartDate();
+    const endDate = this.getEndDate();
+    const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
+    this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
+      + '&rs:currentPage=' + this.currentPage
+      + "&rs:pageSize=" + this.config.pageSize
+      + "&rs:startDate=" + startDate
+      + "&rs:endDate=" + endDate
+      + "&rs:sort=" + this.sortField
+      + "&rs:minQuantity=" + 100
+      , {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'get'
+      }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
+      //achatsStatsForExport = tableauInterventions
+      this.achatsStatsForExport = data.results;
+
+
+      var dataToStore = {};
+      dataToStore.data = [];
+      dataToStore.lineDelimiter = '\n';
+      dataToStore.columnDelimiter = ';';
+
+      let achats = this.achatsStatsForExport;
+      if (achats == null || !achats.length) {
+        return;
+      }
+      for (let achat in achats) {
+        var storeData = {};
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['MAGPMC'] = achats[achat][' MAGPMC'];
+      /*  storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+
+        MAGPMC:25360.12
+        MAGPMCCUMUL:0.0133959821477395
+        MAGPMT:65021.2099999999
+        MAGPMTCUMUL:0.0228765548022412
+        PMC:46.1428571428573
+        PMT:25.7999999999999
+        RatioPMCOpti:0.256235827664399
+        RatioPMTOpti:0.120181405895692
+        SomMontantCalc:119102.24
+        SomQuantiteFacturee:2096
+        main.LignesCommande.Article:"R001441"
+        main.LignesCommande.RefFabricant:"A6283230092"
+        totalPMCOptiVol:1496
+        totalPMTOptiVol:1906  */
+
+        dataToStore.data.push(storeData);
+      }
+
+      var csv = this.convertArrayOfObjectsToCSV(dataToStore);
+      if (csv == null) return;
+
+      var filename = 'toto.csv';
+      if (!csv.match(/^data:text\/csv/i)) {
+        csv = 'data:text/csv;charset=utf-8,' + csv;
+      }
+      var data = encodeURI(csv);
+      var link = document.createElement('a');
+      link.setAttribute('href', data);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
+  };
+
+  convertArrayOfObjectsToCSV(args) {
+    var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+    data = args.data || null;
+    if (data == null || !data.length) {
+      return null;
+    }
+
+    columnDelimiter = args.columnDelimiter || ',';
+    lineDelimiter = args.lineDelimiter || '\n';
+    keys = Object.keys(data[0]);
+    result = '';
+    result += keys.join(columnDelimiter);
+    result += lineDelimiter;
+
+    data.forEach(function (item) {
+      ctr = 0;
+      keys.forEach(function (key) {
+        if (ctr > 0)
+          result += columnDelimiter;
+        result += item[key];
+        ctr++;
+      });
+      result += lineDelimiter;
+    });
+    return result;
+  };
+
 }

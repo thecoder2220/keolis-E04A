@@ -187,8 +187,12 @@
                         </li>
                       </ul>
                     </nav>
+                    <div>
+                      <button class="btn btn-primary small-button" style="margin:auto " width="20px" click.trigger="exportFromMAGDatatable()">Exporter</button>
+                    </div>
                   </div>
                 </th>
+
                 <th colspan="4" style="background-color: #008094; border:0px" if.bind="currentView!='Qualité'">Manque à gagner crédible</th>
                 <th colspan="4" style="background-color: #786F64; border:0px" if.bind="currentView!='Qualité'">Manque à gagner théorique</th>
                 <th colspan="2" style="background-color: #008094; border:0px" if.bind="currentView=='Qualité'">ORI</th>
@@ -257,6 +261,11 @@
                 <th scope="col" if.bind="currentView=='Qualité'">ORF <br />Prix d'achat moyen (€)</th>
                 <th scope="col" if.bind="currentView=='Qualité'" style="border-left: 1px solid #124162">PQE <br />Quantité commandée</th>
                 <th scope="col" if.bind="currentView=='Qualité'">PQE <br />Prix d'achat moyen (€)</th>
+                <th style="background:white; border:1px white" >
+                  <div>
+                    <button class="btn btn-primary small-button" style="margin:auto " width="20px" click.trigger="exportTableau()">Exporter tableau</button>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody class="table">
