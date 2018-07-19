@@ -114,6 +114,7 @@ export class HomeComponent {
       },
       method: 'get'
     }).then(response => response.json()).then(data => {
+      debugger;
       console.log.apply(console, this.logger.log(data, "Profile loaded"));
       this.preSelected.ets = (data.ets != null) ? [data.ets] : [];
       this.filter = this.preSelected;
@@ -822,12 +823,9 @@ export class HomeComponent {
     document.body.removeChild(link);
   };
 
-  // Bouton d'export des données MAG pour la filiale de l'user connecté
-  exportFromMAGDatatable() {
-    console.log('début exécution exportFromMAGDatatable')
-
+  exportDatatable() {
     debugger;
-    this.achatsStats = [];
+    this.achatsStatsForExport = [];
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
@@ -848,10 +846,7 @@ export class HomeComponent {
         method: 'get'
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
-      //achatsStatsForExport = tableauInterventions
       this.achatsStatsForExport = data.results;
-
-
       var dataToStore = {};
       dataToStore.data = [];
       dataToStore.lineDelimiter = '\n';
@@ -863,37 +858,23 @@ export class HomeComponent {
       }
       for (let achat in achats) {
         var storeData = {};
+        storeData['Réf. Fabricant'] = achats[achat]['main.LignesCommande.RefFabricant'];
+        storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
         storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['MAGPMC'] = achats[achat][' MAGPMC'];
-      /*  storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
+        storeData['MAGPMC'] = achats[achat]['MAGPMC'];
+        storeData['MAGPMCCUMUL'] = achats[achat]['MAGPMCCUMUL'];
+        storeData['MAGPMT'] = achats[achat]['MAGPMT'];
+        storeData['MAGPMTCUMUL'] = achats[achat]['MAGPMTCUMUL'];
+        storeData['PMC'] = achats[achat]['PMC'];
+        storeData['PMT'] = achats[achat]['PMT'];
+        storeData['RatioPMCOpti'] = achats[achat]['RatioPMCOpti'];
+        storeData['RatioPMTOpti'] = achats[achat]['RatioPMTOpti'];
+        storeData['SomMontantCalc'] = achats[achat]['SomMontantCalc'];
+        storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
 
-        MAGPMC:25360.12
-        MAGPMCCUMUL:0.0133959821477395
-        MAGPMT:65021.2099999999
-        MAGPMTCUMUL:0.0228765548022412
-        PMC:46.1428571428573
-        PMT:25.7999999999999
-        RatioPMCOpti:0.256235827664399
-        RatioPMTOpti:0.120181405895692
-        SomMontantCalc:119102.24
-        SomQuantiteFacturee:2096
-        main.LignesCommande.Article:"R001441"
-        main.LignesCommande.RefFabricant:"A6283230092"
-        totalPMCOptiVol:1496
-        totalPMTOptiVol:1906  */
+
+        storeData['totalPMCOptiVol'] = achats[achat]['totalPMCOptiVol'];
+        storeData['totalPMTOptiVol'] = achats[achat]['totalPMTOptiVol'];
 
         dataToStore.data.push(storeData);
       }
