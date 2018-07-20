@@ -1,7 +1,18 @@
 Keolis-Prototype-reader
 au run --watch
 
+/v1/resources/achatsStats2?rs:default=' + part + ets
+      + '&rs:currentPage=' + this.currentPage
+      + "&rs:pageSize=" + this.config.pageSize
+      + "&rs:startDate=" + startDate
+      + "&rs:endDate=" + endDate
+      + "&rs:sort=" + this.sortField
+      + "&rs:minQuantity=" + 100
+      
+      http://localhost:9010/v1/resources/achatsStats2?rs:default=&rs:currentPage=1&rs:pageSize=100&rs:startDate=2017-07-01&rs:endDate=2018-07-31&rs:sort=MAGPMC&rs:minQuantity=0
 
+main.LignesCommande.RefFabricant:"A6283230092"
+main.LignesCommande.Article:"R001441"
 AvgPrixTarif:55.9509523809525
 MAGPMC:25360.12
 MAGPMCCUMUL:0.0133959821477395
@@ -13,8 +24,6 @@ RatioPMCOpti:0.256235827664399
 RatioPMTOpti:0.120181405895692
 SomMontantCalc:119102.24
 SomQuantiteFacturee:2096
-main.LignesCommande.Article:"R001441"
-main.LignesCommande.RefFabricant:"A6283230092"
 totalPMCOptiVol:1496
 totalPMTOptiVol:1906
 

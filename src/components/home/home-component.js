@@ -7,7 +7,7 @@ import * as Echarts from 'echarts';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jstree';
-
+import numeral from 'numeral';
 
 @inject(HttpClient, Echarts, EventAggregator)
 export class HomeComponent {
@@ -817,11 +817,11 @@ export class HomeComponent {
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
-      + "&rs:pageSize=" + this.config.pageSize
+      + "&rs:pageSize=" + 100
       + "&rs:startDate=" + startDate
       + "&rs:endDate=" + endDate
       + "&rs:sort=" + this.sortField
-      + "&rs:minQuantity=" + 100
+      + "&rs:minQuantity=" + this.filter.minQuantity
       , {
         headers: {
           'Content-Type': 'application/json;charset=utf-8'
@@ -840,34 +840,34 @@ export class HomeComponent {
         return;
       }
       for (let achat in achats) {
-        var storeData = {};
-        storeData['Réf. Fabricant'] = achats[achat]['main.LignesCommande.RefFabricant'];
-        storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-        storeData['AvgPrixTarif'] = achats[achat]['AvgPrixTarif'];
-        storeData['MAGPMC'] = achats[achat]['MAGPMC'];
-        storeData['MAGPMCCUMUL'] = achats[achat]['MAGPMCCUMUL'];
-        storeData['MAGPMT'] = achats[achat]['MAGPMT'];
-        storeData['MAGPMTCUMUL'] = achats[achat]['MAGPMTCUMUL'];
-        storeData['PMC'] = achats[achat]['PMC'];
-        storeData['PMT'] = achats[achat]['PMT'];
-        storeData['RatioPMCOpti'] = achats[achat]['RatioPMCOpti'];
-        storeData['RatioPMTOpti'] = achats[achat]['RatioPMTOpti'];
-        storeData['SomMontantCalc'] = achats[achat]['SomMontantCalc'];
-        storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+        let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
+        let libelle = this.partNames[refFabricant];
+        if ((libelle !== undefined) && (libelle !== null)) {
+          let storeData = {};
+          storeData['Réf. Fabricant'] = refFabricant;
+          storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+          storeData['Libellé'] = libelle.substring(0, 15);
+          storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+          storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.0');
+          storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
+          storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
+          storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
+          storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
+          storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
+          storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
+          storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
+          storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
+          storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
 
-
-        storeData['totalPMCOptiVol'] = achats[achat]['totalPMCOptiVol'];
-        storeData['totalPMTOptiVol'] = achats[achat]['totalPMTOptiVol'];
-
-        dataToStore.data.push(storeData);
+          dataToStore.data.push(storeData);
+        }
       }
-
       var csv = this.convertArrayOfObjectsToCSV(dataToStore);
       if (csv == null) return;
 
       var filename = 'toto.csv';
       if (!csv.match(/^data:text\/csv/i)) {
-        csv = 'data:text/csv;charset=utf-8,' +'\ufeff' + csv;
+        csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
       }
       var data = encodeURI(csv);
       // new Blob(['\ufeff' + content]
@@ -877,6 +877,7 @@ export class HomeComponent {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
     })
   };
 
