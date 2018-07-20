@@ -91,22 +91,6 @@ export class HomeComponent {
     this.filter = this.preSelected;
   };
 
-  displayDownloadFile = (blob, filename = {}) => {
-    if (typeof window.navigator.msSaveBlob !== 'undefined') {
-      window.navigator.msSaveBlob(blob, filename);
-    }
-    else {
-      const urlFile = window.URL.createObjectURL(blob);
-      const tempLink = document.createElement('a');
-      tempLink.href = urlFile;
-      tempLink.setAttribute('download', filename);
-      tempLink.setAttribute('target', '_blank');
-      document.body.appendChild(tempLink);
-      tempLink.click();
-      document.body.removeChild(tempLink);
-    }
-  }
-
   loadUserProfile() {
     this.http.fetch('/v1/resources/login', {
       headers: {
@@ -114,7 +98,6 @@ export class HomeComponent {
       },
       method: 'get'
     }).then(response => response.json()).then(data => {
-      debugger;
       console.log.apply(console, this.logger.log(data, "Profile loaded"));
       this.preSelected.ets = (data.ets != null) ? [data.ets] : [];
       this.filter = this.preSelected;
@@ -841,7 +824,7 @@ export class HomeComponent {
       + "&rs:minQuantity=" + 100
       , {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json;charset=utf-8'
         },
         method: 'get'
       }).then(response => response.json()).then(data => {
@@ -884,9 +867,10 @@ export class HomeComponent {
 
       var filename = 'toto.csv';
       if (!csv.match(/^data:text\/csv/i)) {
-        csv = 'data:text/csv;charset=utf-8,' + csv;
+        csv = 'data:text/csv;charset=utf-8,' +'\ufeff' + csv;
       }
       var data = encodeURI(csv);
+      // new Blob(['\ufeff' + content]
       var link = document.createElement('a');
       link.setAttribute('href', data);
       link.setAttribute('download', filename);
@@ -895,6 +879,22 @@ export class HomeComponent {
       document.body.removeChild(link);
     })
   };
+
+  displayDownloadFile = (blob, filename = {}) => {
+    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+      window.navigator.msSaveBlob(blob, filename);
+    }
+    else {
+      const urlFile = window.URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = urlFile;
+      tempLink.setAttribute('download', filename);
+      tempLink.setAttribute('target', '_blank');
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+    }
+  }
 
   convertArrayOfObjectsToCSV(args) {
     var result, ctr, keys, columnDelimiter, lineDelimiter, data;
