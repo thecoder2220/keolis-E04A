@@ -33,7 +33,7 @@ export class HomeComponent {
   @bindable currentPart = null;
   @bindable currentPage = 1;
   @bindable lastPageNumber = 1;
-  @bindable partNames;
+  @bindable partNames = [];
   @bindable etsSuggestions;
   @bindable achatsQualiteStats;
   @bindable config = {
@@ -253,7 +253,7 @@ export class HomeComponent {
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
-      this.loadPartsNames(this.achatsStats);
+      this.partNames = this.loadPartsNames(this.achatsStats)
       if (this.currentView == "Qualité") {
         this.loadQualityStats();
       }
@@ -382,7 +382,7 @@ export class HomeComponent {
       })
     }
 
-    this.http.fetch('/v1/resources/partName', {
+    return this.http.fetch('/v1/resources/partName', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -390,7 +390,7 @@ export class HomeComponent {
       body: json(query)
     }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data part names loaded"));
-      this.partNames = data;
+      return data;
     })
   };
 
@@ -828,59 +828,63 @@ export class HomeComponent {
         },
         method: 'get'
       }).then(response => response.json()).then(data => {
-      console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
-      this.achatsStatsForExport = data.results;
-      this.loadPartsNames(this.achatsStatsForExport);
-      var dataToStore = {};
-      dataToStore.data = [];
-      dataToStore.lineDelimiter = '\n';
-      dataToStore.columnDelimiter = ';';
+        console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
+        this.achatsStatsForExport = data.results;
+        this.loadPartsNames(this.achatsStatsForExport).then(labels => {
+            this.partNames = labels;
+            var dataToStore = {};
+            dataToStore.data = [];
+            dataToStore.lineDelimiter = '\n';
+            dataToStore.columnDelimiter = ';';
 
-      let achats = this.achatsStatsForExport;
-      if (achats == null || !achats.length) {
-        return;
-      }
-      for (let achat in achats) {
-        let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
-        let libelle = this.partNames[refFabricant];
-        if ((libelle !== undefined) && (libelle !== null)) {
-          let storeData = {};
-          storeData['Réf. Fabricant'] = refFabricant;
-          storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-          storeData['Libellé'] = libelle.substring(0, 15);
-          storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
-          storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.0');
-          storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-          storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
-          storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
-          storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
-          storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
-          storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
-          storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
-          storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
-          storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
+            let achats = this.achatsStatsForExport;
+            if (achats == null || !achats.length) {
+              return;
+            }
+            for (let achat in achats) {
+              let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
+              let label = this.partNames[refFabricant];
+              if ((label !== undefined) && (label !== null)) {
+                let storeData = {};
+                storeData['Réf. Fabricant'] = refFabricant;
+                storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+                storeData['Libellé'] = label.substring(0, 15);
+                storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+                storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+                storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
+                storeData['Achats optimisés'] = numeral(((1 - achats[achat]["totalPMCOptiVol"]) / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
 
-          dataToStore.data.push(storeData);
-        }
-      }
-      var csv = this.convertArrayOfObjectsToCSV(dataToStore);
-      if (csv == null) return;
+                storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
+                storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
+                storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
+                storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
+                storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
+                storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
+                storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
 
-      var filename = 'toto.csv';
-      if (!csv.match(/^data:text\/csv/i)) {
-        csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
-      }
-      var data = encodeURI(csv);
-      // new Blob(['\ufeff' + content]
-      var link = document.createElement('a');
-      link.setAttribute('href', data);
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+                dataToStore.data.push(storeData);
+              }
+            }
+            var csv = this.convertArrayOfObjectsToCSV(dataToStore);
+            if (csv == null) return;
 
-    })
-  };
+            var filename = 'toto.csv';
+            if (!csv.match(/^data:text\/csv/i)) {
+              csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
+            }
+            var data = encodeURI(csv);
+            // new Blob(['\ufeff' + content]
+            var link = document.createElement('a');
+            link.setAttribute('href', data);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+          })
+      })
+  }
+  ;
 
   displayDownloadFile = (blob, filename = {}) => {
     if (typeof window.navigator.msSaveBlob !== 'undefined') {
@@ -923,6 +927,7 @@ export class HomeComponent {
       result += lineDelimiter;
     });
     return result;
-  };
+  }
+  ;
 
 }
