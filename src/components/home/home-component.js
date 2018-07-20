@@ -253,7 +253,7 @@ export class HomeComponent {
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
-      this.loadPartsNames();
+      this.loadPartsNames(this.achatsStats);
       if (this.currentView == "Qualité") {
         this.loadQualityStats();
       }
@@ -375,9 +375,9 @@ export class HomeComponent {
   };
 
 
-  loadPartsNames() {
+  loadPartsNames(source) {
     let query = {
-      "parts": this.achatsStats.map(function (item) {
+      "parts": source.map(function (item) {
         return item["main.LignesCommande.RefFabricant"]
       })
     }
@@ -830,6 +830,7 @@ export class HomeComponent {
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
       this.achatsStatsForExport = data.results;
+      this.loadPartsNames(this.achatsStatsForExport);
       var dataToStore = {};
       dataToStore.data = [];
       dataToStore.lineDelimiter = '\n';
