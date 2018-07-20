@@ -848,16 +848,16 @@ export class HomeComponent {
                 let storeData = {};
                 storeData['Réf. Fabricant'] = refFabricant;
                 storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-                storeData['Libellé'] = label.substring(0, 15);
+                storeData['Libellé'] = label.substring(0, 15).replace('\"','');;
                 storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
                 storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
                 storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-                storeData['Achats optimisés'] = numeral(((1 - achats[achat]["totalPMCOptiVol"]) / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
+                storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"]) ).format('0 %');
 
                 storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
                 storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
                 storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
-                storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"]) * 100).format('0)');
+                storeData['MAG Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"]) ).format('0 %');
                 storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
                 storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
                 storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
