@@ -1,4 +1,6 @@
 Keolis-Prototype-reader
+keolis_versailles/wcjigb
+
 au run --watch
 
 /v1/resources/achatsStats2?rs:default=' + part + ets

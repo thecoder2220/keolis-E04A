@@ -757,54 +757,33 @@ export class HomeComponent {
 
   // Bouton d'export des données MAG pour la filiale de l'user connecté
   exportUserSubsidiaryMAGData() {
-    console.log('début exécution exportUserSubsidiaryMAGData')
     var dataToStore = {};
     dataToStore.data = [];
     dataToStore.lineDelimiter = '\n';
     dataToStore.columnDelimiter = ';';
     debugger;
-    var interventions = this.achatsStats;
-    var storeData = {};
     this.http.fetch('/v1/resources/MAGAggregates?rs:format=csv'
       , {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain;charset=UTF-8'
         },
         method: 'get'
-      }).then(response => response.json()).then(data => {
-      console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
-      dataToStore.data.push(storeData);
+      }).then(response => response.text()).then(csvdata => {
+      console.log.apply(console, this.logger.log(csvdata, "Method exportUserSubsidiaryMAGData - Data loaded"));
+      if (csvdata == null) return;
+      let filename = (this.preSelected.ets !== undefined && this.preSelected.ets !== null) ? 'Analyse MAG - ' + this.preSelected.ets[0].name + '.csv' : 'Analyse MAG.csv'
+      if (!csvdata.match(/^data:text\/csv/i)) {
+        csvdata = 'data:text/csv;charset=utf-8,' + '\ufeff' + csvdata.replace(new RegExp(',', 'g'), ';');
+      }
+      var link = document.createElement('a');
+      link.setAttribute('href', csvdata);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     })
-    /*  exemple
-     if(interventions == null || !interventions.length) { return; }
-     for(var intervention in interventions) {
-     var storeData = {};
-     storeData['num_intervention'] = interventions[intervention]['num_intervention'];
-     storeData['date_intervention'] = interventions[intervention]['date_intervention'];
-     storeData['id_piece'] = interventions[intervention]['id_piece'];
-     storeData['libelle'] = interventions[intervention]['libelle'];
-     storeData['quantite_piece'] = interventions[intervention]['quantite_piece'];
-     storeData['prix_piece'] = interventions[intervention]['prix_piece'];
-     storeData['montant_total'] = interventions[intervention]['montant_total'];
-     dataToStore.data.push(storeData);
-     }
-     */
-
-    var csv = this.convertArrayOfObjectsToCSV(dataToStore);
-    if (csv == null) return;
-
-    var filename = this.typeVehiculeVehicule.replace(/ /i, '_') + '_' + this.idVehicule + '.csv';
-    if (!csv.match(/^data:text\/csv/i)) {
-      csv = 'data:text/csv;charset=utf-8,' + csv;
-    }
-    var data = encodeURI(csv);
-    var link = document.createElement('a');
-    link.setAttribute('href', data);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
+
 
   exportDatatable() {
     debugger;
@@ -828,63 +807,61 @@ export class HomeComponent {
         },
         method: 'get'
       }).then(response => response.json()).then(data => {
-        console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
-        this.achatsStatsForExport = data.results;
-        this.loadPartsNames(this.achatsStatsForExport).then(labels => {
-            this.partNames = labels;
-            var dataToStore = {};
-            dataToStore.data = [];
-            dataToStore.lineDelimiter = '\n';
-            dataToStore.columnDelimiter = ';';
+      console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
+      this.achatsStatsForExport = data.results;
+      this.loadPartsNames(this.achatsStatsForExport).then(labels => {
+        this.partNames = labels;
+        var dataToStore = {};
+        dataToStore.data = [];
+        dataToStore.lineDelimiter = '\n';
+        dataToStore.columnDelimiter = ';';
 
-            let achats = this.achatsStatsForExport;
-            if (achats == null || !achats.length) {
-              return;
-            }
-            for (let achat in achats) {
-              let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
-              let label = this.partNames[refFabricant];
-              if ((label !== undefined) && (label !== null)) {
-                let storeData = {};
-                storeData['Réf. Fabricant'] = refFabricant;
-                storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-                storeData['Libellé'] = label.substring(0, 15).replace('\"','');;
-                storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
-                storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
-                storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-                storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"]) ).format('0 %');
+        let achats = this.achatsStatsForExport;
+        if (achats == null || !achats.length) {
+          return;
+        }
+        for (let achat in achats) {
+          let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
+          let label = this.partNames[refFabricant];
+          if ((label !== undefined) && (label !== null)) {
+            let storeData = {};
+            storeData['Réf. Fabricant'] = refFabricant;
+            storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+            storeData['Libellé'] = label.substring(0, 15).replace('\"', '');
+            ;
+            storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+            storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+            storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
+            storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"])).format('0 %');
+            storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
+            storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
+            storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
+            storeData['MAG Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"])).format('0 %');
+            storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
+            storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
+            storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
+            dataToStore.data.push(storeData);
+          }
+        }
+        var csv = this.convertArrayOfObjectsToCSV(dataToStore);
+        if (csv == null) return;
 
-                storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
-                storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
-                storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
-                storeData['MAG Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"]) ).format('0 %');
-                storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
-                storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
-                storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
+        var filename = 'Analyse par pièce.csv';
+        if (!csv.match(/^data:text\/csv/i)) {
+          csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
+        }
+        var data = encodeURI(csv);
+        // new Blob(['\ufeff' + content]
+        var link = document.createElement('a');
+        link.setAttribute('href', data);
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-                dataToStore.data.push(storeData);
-              }
-            }
-            var csv = this.convertArrayOfObjectsToCSV(dataToStore);
-            if (csv == null) return;
-
-            var filename = 'toto.csv';
-            if (!csv.match(/^data:text\/csv/i)) {
-              csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
-            }
-            var data = encodeURI(csv);
-            // new Blob(['\ufeff' + content]
-            var link = document.createElement('a');
-            link.setAttribute('href', data);
-            link.setAttribute('download', filename);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-          })
       })
-  }
-  ;
+    })
+  };
 
   displayDownloadFile = (blob, filename = {}) => {
     if (typeof window.navigator.msSaveBlob !== 'undefined') {
