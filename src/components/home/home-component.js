@@ -769,7 +769,6 @@ export class HomeComponent {
         },
         method: 'get'
       }).then(response => response.text()).then(csvdata => {
-      console.log.apply(console, this.logger.log(csvdata, "Method exportUserSubsidiaryMAGData - Data loaded"));
       if (csvdata == null) return;
       let filename = (this.preSelected.ets !== undefined && this.preSelected.ets !== null) ? 'Analyse MAG - ' + this.preSelected.ets[0].name + '.csv' : 'Analyse MAG.csv'
       if (!csvdata.match(/^data:text\/csv/i)) {
