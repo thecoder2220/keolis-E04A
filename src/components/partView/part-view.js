@@ -8,6 +8,7 @@ import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jquery-ui';
 import { convertArrayOfObjectsToCSV } from '../../utils'
+import numeral from 'numeral';
 
 @inject(HttpClient, Echarts, EventAggregator)
 export class PartView {
@@ -333,25 +334,43 @@ export class PartView {
           storeData['Prix'] = orders[order]['PVFSALCA'];
           storeData['Délai (jours)'] = orders[order]['catalog']['P_URI']['DLVSBART'];
           storeData['Qualité'] = orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
-          storeData['Manque à gagner'] = ''
-
-
-          storeData['Date'] = 'Prix Crédible';
-        /*    <center>
-            <i>Prix Cr&eacute;dible</i>
-          </center>
-          </td>
-          <td scope="col" class="table-warning">${fournisseurs[order["catalog"]["P_PMC"]["FOUSBART"]]}</td>
-            <th scope="col" class="table-warning">${fournisseurs[order["catalog"]["P_PMC"]["TFASBART"]]} (${order["catalog"]["P_PMC"]["TFASBART"]})</th>
-            <th scope="col" class="table-warning">${order["catalog"]["P_PMC"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</th>
-            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["REFSBART"]}</td>
-            <td scope="col" class="table-warning">${order["PMC"] | numberFormat:'0.0)'}</td>
-            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["DLVSBART"]}</td>
-            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
-            <td scope="col" class="table-warning">${order["PMC_MT"] | numberFormat:'0.0)'}</td>
-*/
-
+          storeData['Manque à gagner'] = '';
           dataToStore.data.push(storeData);
+
+          storeData = {};
+          storeData['Date'] = '';
+          storeData['Filiale'] = 'Prix spécifique';
+          storeData['Référence commande'] = '';
+          storeData['Quantité'] = '';
+          storeData['Fournisseur'] = this.fournisseurs[orders[order]['catalog']['P_PMC']['FOUSBART']];
+          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['TFASBART']]+ ' '+ orders[order]['catalog']['P_URI']['TFASBART'];
+          let keoEquipPS = orders[order]['catalog']['P_PMC']['Properties']['KEO_EQUIP'];
+          storeData['Equipementier'] =  (keoEquipPS!== undefined && keoEquipPS !== null)?keoEquipPS['VALSBAAA']:'';
+          storeData['Référence fournisseur'] = orders[order]['catalog']['P_PMC']['REFSBART'];
+          storeData['Prix'] = numeral(orders[order]['PMC']).format('0.0)');
+          storeData['Délai (jours)'] = orders[order]['catalog']['P_PMC']['DLVSBART'];
+
+          storeData['Qualité'] = orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
+          storeData['Manque à gagner'] = numeral(orders[order]['PMC_MT']).format('0.0)');
+          dataToStore.data.push(storeData);
+
+          storeData = {};
+          storeData['Date'] = '';
+          storeData['Filiale'] = 'Prix Minimal';
+          storeData['Référence commande'] = '';
+          storeData['Quantité'] = '';
+          storeData['Fournisseur'] = this.fournisseurs[orders[order]['catalog']['P_PMT']['FOUSBART']];
+          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_PMT']['TFASBART']]+ ' '+ orders[order]['catalog']['P_PMT']['TFASBART'];
+          let keoEquipPM = orders[order]['catalog']['P_PMT']['Properties']['KEO_EQUIP'];
+          storeData['Equipementier'] =  (keoEquipPM!== undefined && keoEquipPM !== null)?keoEquipPM['VALSBAAA']:'';
+          storeData['Référence fournisseur'] = orders[order]['catalog']['P_PMT']['REFSBART'];
+          storeData['Prix'] = numeral(orders[order]['PMT']).format('0.0)');
+          storeData['Délai (jours)'] = orders[order]['catalog']['P_PMT']['DLVSBART'];
+
+          storeData['Qualité'] = orders[order]['catalog']['P_PMT']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
+          storeData['Manque à gagner'] = numeral(orders[order]['PMT_MT']).format('0.0)');
+          dataToStore.data.push(storeData);
+
         }
         var csv = convertArrayOfObjectsToCSV(dataToStore);
         if (csv == null) return;
