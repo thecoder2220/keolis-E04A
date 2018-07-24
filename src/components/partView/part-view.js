@@ -7,7 +7,7 @@ import * as Echarts from 'echarts'
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jquery-ui';
-
+import { convertArrayOfObjectsToCSV } from '../../utils'
 
 @inject(HttpClient, Echarts, EventAggregator)
 export class PartView {
@@ -296,7 +296,6 @@ export class PartView {
     const endDate = this.getEndDate();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     this.orderLinesForExport = [];
-    this.orderLinesReady = false;
     this.http.fetch('/v1/resources/partOrderLine?rs:default=' + part + ets + '&rs:currentPage=' + 1 + "&rs:pageSize=" + 100
       + "&rs:startDate=" + startDate
       + "&rs:endDate=" + endDate
@@ -310,11 +309,48 @@ export class PartView {
       this.orderLinesForExport = data.results;
       this.loadFournisseurNames(this.orderLinesForExport).then(providers => {
         this.fournisseurs = providers;
-        this.orderLinesReady = true;
         this.getCurrentETSNames();
+        var dataToStore = {};
+        dataToStore.data = [];
+        dataToStore.lineDelimiter = '\n';
+        dataToStore.columnDelimiter = ';';
+        let orders = this.orderLinesForExport;
+        if (orders == null || !orders.length) {
+          return;
+        }
+        for (let order in orders) {
+          let storeData = {};
 
+          storeData['Date'] = orders[order]['DCRSALCA_norm'];
+          storeData['Filiale'] = this.etablissements[orders[order]['ETSSALCA']].name;
+          storeData['Référence commande'] = orders[order]['NUISALCA'];
+          storeData['Quantité'] = orders[order]['QTFSALCA_norm'];
+          storeData['Fournisseur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['FOUSBART']];
+          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['TFASBART']]+ ' '+ orders[order]['catalog']['P_URI']['TFASBART'];
+          let keoEquip = orders[order]['catalog']['P_URI']['Properties']['KEO_EQUIP'];
+          storeData['Equipementier'] =  (keoEquip!== undefined && keoEquip !== null)?keoEquip['VALSBAAA']:'';
+          storeData['Référence fournisseur'] = orders[order]['catalog']['P_URI']['REFSBART'];
+          storeData['Prix'] = orders[order]['PVFSALCA'];
+          storeData['Délai (jours)'] = orders[order]['catalog']['P_URI']['DLVSBART'];
+          storeData['Qualité'] = orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
+          storeData['Manque à gagner'] = ''
+          dataToStore.data.push(storeData);
+        }
+        var csv = convertArrayOfObjectsToCSV(dataToStore);
+        if (csv == null) return;
 
-
+        var filename = 'Détails des commandes.csv';
+        if (!csv.match(/^data:text\/csv/i)) {
+          csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
+        }
+        var data = encodeURI(csv);
+        // new Blob(['\ufeff' + content]
+        var link = document.createElement('a');
+        link.setAttribute('href', data);
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       })
     })
   }

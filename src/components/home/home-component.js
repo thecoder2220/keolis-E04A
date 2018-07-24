@@ -903,7 +903,6 @@ export class HomeComponent {
       result += lineDelimiter;
     });
     return result;
-  }
-  ;
+  };
 
 }
