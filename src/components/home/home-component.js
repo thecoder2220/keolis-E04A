@@ -8,6 +8,7 @@ import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jstree';
 import numeral from 'numeral';
+import { convertArrayOfObjectsToCSV } from '../../utils'
 
 @inject(HttpClient, Echarts, EventAggregator)
 export class HomeComponent {
@@ -842,7 +843,7 @@ export class HomeComponent {
             dataToStore.data.push(storeData);
           }
         }
-        var csv = this.convertArrayOfObjectsToCSV(dataToStore);
+        var csv = convertArrayOfObjectsToCSV(dataToStore);
         if (csv == null) return;
 
         var filename = 'Analyse par pièce.csv';
@@ -860,49 +861,6 @@ export class HomeComponent {
 
       })
     })
-  };
-
-  displayDownloadFile = (blob, filename = {}) => {
-    if (typeof window.navigator.msSaveBlob !== 'undefined') {
-      window.navigator.msSaveBlob(blob, filename);
-    }
-    else {
-      const urlFile = window.URL.createObjectURL(blob);
-      const tempLink = document.createElement('a');
-      tempLink.href = urlFile;
-      tempLink.setAttribute('download', filename);
-      tempLink.setAttribute('target', '_blank');
-      document.body.appendChild(tempLink);
-      tempLink.click();
-      document.body.removeChild(tempLink);
-    }
-  }
-
-  convertArrayOfObjectsToCSV(args) {
-    var result, ctr, keys, columnDelimiter, lineDelimiter, data;
-    data = args.data || null;
-    if (data == null || !data.length) {
-      return null;
-    }
-
-    columnDelimiter = args.columnDelimiter || ',';
-    lineDelimiter = args.lineDelimiter || '\n';
-    keys = Object.keys(data[0]);
-    result = '';
-    result += keys.join(columnDelimiter);
-    result += lineDelimiter;
-
-    data.forEach(function (item) {
-      ctr = 0;
-      keys.forEach(function (key) {
-        if (ctr > 0)
-          result += columnDelimiter;
-        result += item[key];
-        ctr++;
-      });
-      result += lineDelimiter;
-    });
-    return result;
   };
 
 }
