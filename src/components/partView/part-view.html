@@ -54,6 +54,11 @@
               <th scope="col">Qualit&eacute;</th>
               <th scope="col">Manque &agrave; gagner (€)</th>
               <th scope="col">catalogue</th>
+              <th style="background:white; border:2px white; position:relative;bottom:-8px;margin-top:7px;" >
+                <div>
+                  <button class="btn btn-primary small-button" style="margin:auto " width="20px" click.trigger="exportOrderDetails()">Exporter</button>
+                </div>
+              </th>
             </tr>
           </thead>
 
@@ -103,6 +108,7 @@
                 <a href="#" data-toggle="modal" data-target="#exampleModalLong" class="badge badge-info" click.trigger="loadCatalogEntries(achat['DCRSALCA_norm'],achat['RFBSALCA'],achat['PVFSALCA'])">D&eacute;tails catalogue</a>
               </td>
             </tr>
+
             <tr>
               <td colspan="4" class="table-warning">
                 <center>

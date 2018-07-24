@@ -13,6 +13,9 @@ au run --watch
       
       http://localhost:9010/v1/resources/achatsStats2?rs:default=&rs:currentPage=1&rs:pageSize=100&rs:startDate=2017-07-01&rs:endDate=2018-07-31&rs:sort=MAGPMC&rs:minQuantity=0
 
+http://localhost:9010/v1/resources/partOrderLine?rs:default=&rs:part=A9434210412&rs:ets=7804&rs:currentPage=1&rs:pageSize=100&rs:startDate=2017-07-01&rs:endDate=2018-07-31
+
+
 main.LignesCommande.RefFabricant:"A6283230092"
 main.LignesCommande.Article:"R001441"
 AvgPrixTarif:55.9509523809525

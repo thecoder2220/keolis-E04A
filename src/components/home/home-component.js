@@ -16,16 +16,13 @@ export class HomeComponent {
   position = 'top';
   trigger = 'mouseover';
   facets = {};
-
   logTypes = ['debug', 'info', 'prod'];
   logging = 2;
-
 
   @bindable currentSuggestionType = "ets";
   @bindable currentSuggestionLabel = "Nom ou identifiant de la filiale";
   @bindable currentSuggestionTitle = "Filiale(s)";
   @bindable sortField = "MAGPMC";
-
   @bindable diagramIsReady = true;
   @bindable achatsStatsReady = true;
   @bindable achatsQualiteStatsReady = true;
@@ -116,6 +113,7 @@ export class HomeComponent {
 
   setCurrentView(viewName) {
     console.log.apply(console, this.logger.log(null, "Change view :", viewName));
+    this.currentPage=1;
     this.sendTracking(viewName)
 
     if (viewName == "Agrégée") {
@@ -249,11 +247,13 @@ export class HomeComponent {
       console.log.apply(console, this.logger.log(data, "Data achats loaded"));
       this.currentUser = data.currentUser;
       this.achatsStats = data.results;
-      this.achatsStatsReady = true;
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
-      this.partNames = this.loadPartsNames(this.achatsStats)
+      this.loadPartsNames(this.achatsStats).then(response => {
+        this.partNames = response;
+        this.achatsStatsReady = true;
+      })
       if (this.currentView == "Qualité") {
         this.loadQualityStats();
       }
@@ -289,10 +289,11 @@ export class HomeComponent {
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data quality loaded"));
       this.achatsQualiteStats = data;
-      this.achatsQualiteStatsReady = true;
       for (var achat of this.achatsStats) {
         achat.showQuality = this.showQualityLine(achat);
       }
+      this.config.totalItems = data.totalItems;
+      this.achatsQualiteStatsReady = true;
     })
   };
 
@@ -794,7 +795,7 @@ export class HomeComponent {
     const endDate = this.getEndDate();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
-      + '&rs:currentPage=' + this.currentPage
+      + '&rs:currentPage=' + 1
       + "&rs:pageSize=" + 100
       + "&rs:startDate=" + startDate
       + "&rs:endDate=" + endDate
@@ -826,8 +827,7 @@ export class HomeComponent {
             let storeData = {};
             storeData['Réf. Fabricant'] = refFabricant;
             storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-            storeData['Libellé'] = label.substring(0, 15).replace('\"', '');
-            ;
+            storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
             storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
             storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
             storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
