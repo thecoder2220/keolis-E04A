@@ -24,3 +24,33 @@ export const convertArrayOfObjectsToCSV = (args) => {
   });
   return result;
 }
+
+
+export const downloadFile = (dataToStore, filename = 'export.csv') => {
+  var csv = convertArrayOfObjectsToCSV(dataToStore);
+  if (csv == null) return;
+  if (!csv.match(/^data:text\/csv/i)) {
+    csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
+  }
+  let data = encodeURI(csv);
+  // new Blob(['\ufeff' + content]
+  let link = document.createElement('a');
+  link.setAttribute('href', data);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+    /* le code suivant  marche
+    var CSV = [
+    '"1","val1","val2","val3","val4"',
+    '"2","val1","val2","val3","val4"',
+    '"3","val1","val2","val3","val4"'
+  ].join('\n');
+
+  var csvFile = new Blob([CSV], {type: 'text/csv'});
+  var a = document.createElement('a');
+  a.download = 'my.csv';
+  a.href = window.URL.createObjectURL(csvFile);
+  */
+}

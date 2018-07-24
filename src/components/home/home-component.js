@@ -8,7 +8,7 @@ import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jstree';
 import numeral from 'numeral';
-import { convertArrayOfObjectsToCSV } from '../../utils'
+import {convertArrayOfObjectsToCSV, downloadFile} from '../../utils'
 
 @inject(HttpClient, Echarts, EventAggregator)
 export class HomeComponent {
@@ -56,7 +56,7 @@ export class HomeComponent {
 
   @bindable state = 0;
   achatsStatsForExport = [];
-
+  achatsQualiteStatsForExport = [];
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
   /* ******************************************************************************************************************* */
@@ -114,7 +114,7 @@ export class HomeComponent {
 
   setCurrentView(viewName) {
     console.log.apply(console, this.logger.log(null, "Change view :", viewName));
-    this.currentPage=1;
+    this.currentPage = 1;
     this.sendTracking(viewName)
 
     if (viewName == "Agrégée") {
@@ -624,7 +624,6 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
-
     this.http.fetch('/v1/resources/ecartAchatMoyen?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -635,8 +634,6 @@ export class HomeComponent {
           'Content-Type': 'application/json'
         },
         method: 'get'
-
-
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data ecart moyen loaded"));
       this.ecartMoyen = data.ratio;
@@ -690,7 +687,7 @@ export class HomeComponent {
         var date = axisLabels[i];
         axisLabels[i] = date.substring(8, 10) + '/' + date.substring(5, 7) + '/' + date.substring(0, 4);
       }
-      console.log.apply(console, this.logger.log(data, "Setup year chart"));
+      //console.log.apply(console, this.logger.log(data, "Setup year chart"));
       this.diagramIsReady = true;
       $("div#mainDiagram1").removeClass('hidden');
 
@@ -788,41 +785,94 @@ export class HomeComponent {
 
   exportDatatable() {
     debugger;
-    this.achatsStatsForExport = [];
+
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
-    this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
-      + '&rs:currentPage=' + 1
-      + "&rs:pageSize=" + 100
-      + "&rs:startDate=" + startDate
-      + "&rs:endDate=" + endDate
-      + "&rs:sort=" + this.sortField
-      + "&rs:minQuantity=" + this.filter.minQuantity
-      , {
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        method: 'get'
-      }).then(response => response.json()).then(data => {
-      console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
-      this.achatsStatsForExport = data.results;
-      this.loadPartsNames(this.achatsStatsForExport).then(labels => {
-        this.partNames = labels;
-        var dataToStore = {};
-        dataToStore.data = [];
-        dataToStore.lineDelimiter = '\n';
-        dataToStore.columnDelimiter = ';';
+    var dataToStore = {};
+    dataToStore.data = [];
+    dataToStore.lineDelimiter = '\n';
+    dataToStore.columnDelimiter = ';';
+    if (this.currentView === 'Agrégée') {
+      this.achatsStatsForExport = [];
+      this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
+        + '&rs:currentPage=' + 1
+        + "&rs:pageSize=" + 100
+        + "&rs:startDate=" + startDate
+        + "&rs:endDate=" + endDate
+        + "&rs:sort=" + this.sortField
+        + "&rs:minQuantity=" + this.filter.minQuantity
+        , {
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          },
+          method: 'get'
+        }).then(response => response.json()).then(data => {
+        //console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
+        this.achatsStatsForExport = data.results;
+        this.loadPartsNames(this.achatsStatsForExport).then(labels => {
+          this.partNames = labels;
+          let achats = this.achatsStatsForExport;
+          if (achats == null || !achats.length) {
+            return;
+          }
+          for (let achat in achats) {
+            let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
+            let label = this.partNames[refFabricant];
+            if ((label !== undefined) && (label !== null)) {
+              let storeData = {};
+              storeData['Réf. Fabricant'] = refFabricant;
+              storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+              storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
+              storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+              storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+              storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
+              storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"])).format('0 %');
+              storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
+              storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
+              storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
+              storeData['MAG Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"])).format('0 %');
+              storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
+              storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
+              storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
+              dataToStore.data.push(storeData);
+            }
+          }
+          downloadFile(dataToStore, 'Analyse par pièce.csv');
+        })
 
+      })
+    } else if (this.currentView === 'Qualité') {
+      let parts = {
+        parts: this.achatsStats.map(function (item) {
+          return item["main.LignesCommande.RefFabricant"]
+        })
+      };
+      this.achatsQualiteStatsForExport = [];
+      this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
+        + '&rs:currentPage=' + 1
+        + "&rs:pageSize=" + 100
+        + "&rs:startDate=" + startDate
+        + "&rs:endDate=" + endDate
+        , {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          method: 'post',
+          body: json(parts)
+        }).then(response => response.json()).then(data => {
+        console.log.apply(console, this.logger.log(data, "Data quality loaded for export csv"));
+        this.achatsQualiteStatsForExport = data.results;
         let achats = this.achatsStatsForExport;
         if (achats == null || !achats.length) {
           return;
         }
         for (let achat in achats) {
           let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
+          let refArticle = achats[achat]['main.LignesCommande.Article'];
           let label = this.partNames[refFabricant];
           if ((label !== undefined) && (label !== null)) {
             let storeData = {};
@@ -832,35 +882,19 @@ export class HomeComponent {
             storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
             storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
             storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-            storeData['Achats optimisés'] = numeral((1 - achats[achat]["totalPMCOptiVol"] / achats[achat]["SomQuantiteFacturee"])).format('0 %');
-            storeData['Prix crédible moyen'] = numeral(achats[achat]["PMC"]).format('0.0)');
-            storeData['Manque à Gagner crédible'] = numeral(achats[achat]["MAGPMC"]).format('0.0)');
-            storeData['Cumul des Manques à Gagner crédible'] = numeral(achats[achat]["MAGPMCCUMUL"]).format('(0.0 %)');
-            storeData['MAG Achats optimisés'] = numeral((1 - achats[achat]["totalPMTOptiVol"] / achats[achat]["SomQuantiteFacturee"])).format('0 %');
-            storeData['Prix minimum moyen'] = numeral(achats[achat]["PMT"]).format('0.0)');
-            storeData['Manque à Gagner théorique'] = numeral(achats[achat]["MAGPMT"]).format('0.0)');
-            storeData['Cumul des Manques à Gagner théorique'] = numeral(achats[achat]["MAGPMTCUMUL"]).format('(0.0 %)');
+            storeData['ORI / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+            storeData['ORI / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['AvgPrixTarif']).format('0.0)');
+            storeData['ORF / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+            storeData['ORF / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
+            storeData['PQE / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['PQE']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+            storeData['PQE / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['PQE']['AvgPrixTarif']).format('0.0)');
             dataToStore.data.push(storeData);
           }
         }
-        var csv = convertArrayOfObjectsToCSV(dataToStore);
-        if (csv == null) return;
-
-        var filename = 'Analyse par pièce.csv';
-        if (!csv.match(/^data:text\/csv/i)) {
-          csv = 'data:text/csv;charset=utf-8,' + '\ufeff' + csv;
-        }
-        var data = encodeURI(csv);
-        // new Blob(['\ufeff' + content]
-        var link = document.createElement('a');
-        link.setAttribute('href', data);
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
+        const file = new Blob([convertArrayOfObjectsToCSV(dataToStore)], { type: 'text/csv' });
+        downloadFile(file, 'Analyse par pièce.csv');
       })
-    })
+    }
   };
 
 }
