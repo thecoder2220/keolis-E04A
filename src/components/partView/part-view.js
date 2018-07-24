@@ -334,6 +334,23 @@ export class PartView {
           storeData['Délai (jours)'] = orders[order]['catalog']['P_URI']['DLVSBART'];
           storeData['Qualité'] = orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
           storeData['Manque à gagner'] = ''
+
+
+          storeData['Date'] = 'Prix Crédible';
+        /*    <center>
+            <i>Prix Cr&eacute;dible</i>
+          </center>
+          </td>
+          <td scope="col" class="table-warning">${fournisseurs[order["catalog"]["P_PMC"]["FOUSBART"]]}</td>
+            <th scope="col" class="table-warning">${fournisseurs[order["catalog"]["P_PMC"]["TFASBART"]]} (${order["catalog"]["P_PMC"]["TFASBART"]})</th>
+            <th scope="col" class="table-warning">${order["catalog"]["P_PMC"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</th>
+            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["REFSBART"]}</td>
+            <td scope="col" class="table-warning">${order["PMC"] | numberFormat:'0.0)'}</td>
+            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["DLVSBART"]}</td>
+            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
+            <td scope="col" class="table-warning">${order["PMC_MT"] | numberFormat:'0.0)'}</td>
+*/
+
           dataToStore.data.push(storeData);
         }
         var csv = convertArrayOfObjectsToCSV(dataToStore);
