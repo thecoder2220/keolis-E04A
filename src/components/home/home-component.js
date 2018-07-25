@@ -263,6 +263,7 @@ export class HomeComponent {
 
 
   loadQualityStats() {
+    this.achatsQualiteStats = [];
     let parts = {
       parts: this.achatsStats.map(function (item) {
         return item["main.LignesCommande.RefFabricant"]
@@ -273,7 +274,6 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
-    this.achatsQualiteStats = [];
     this.achatsQualiteStatsReady = false;
 
     this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
