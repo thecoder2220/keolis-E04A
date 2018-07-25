@@ -7,7 +7,7 @@ import * as Echarts from 'echarts'
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jquery-ui';
-import {convertArrayOfObjectsToCSV, downloadFile} from '../../utils'
+import {downloadFile} from '../../utils'
 import numeral from 'numeral';
 
 @inject(HttpClient, Echarts, EventAggregator)
@@ -248,6 +248,7 @@ export class PartView {
         },
         method: 'get'
       }).then(response => response.json()).then(data => {
+      debugger
       this.fournisseurIsReady = true;
       $("div#fournisseurDiagram").removeClass('hidden');
 
@@ -324,17 +325,17 @@ export class PartView {
 
           storeData['Date'] = orders[order]['DCRSALCA_norm'];
           let etssalca = this.etablissements[orders[order]['ETSSALCA']];
-          storeData['Filiale'] = etssalca !== null && etssalca!==undefined?etssalca.name:'';
+          storeData['Filiale'] = etssalca !== null && etssalca !== undefined ? etssalca.name : '';
           storeData['Référence commande'] = orders[order]['NUISALCA'];
           storeData['Quantité'] = orders[order]['QTFSALCA_norm'];
           storeData['Fournisseur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['FOUSBART']];
-          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['TFASBART']]+ ' '+ orders[order]['catalog']['P_URI']['TFASBART'];
+          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['TFASBART']] + ' ' + orders[order]['catalog']['P_URI']['TFASBART'];
           let keoEquip = orders[order]['catalog']['P_URI']['Properties']['KEO_EQUIP'];
-          storeData['Equipementier'] =  (keoEquip!== undefined && keoEquip !== null)?keoEquip['VALSBAAA']:'';
+          storeData['Equipementier'] = (keoEquip !== undefined && keoEquip !== null) ? keoEquip['VALSBAAA'] : '';
           storeData['Référence fournisseur'] = orders[order]['catalog']['P_URI']['REFSBART'];
           storeData['Prix'] = orders[order]['PVFSALCA'];
           storeData['Délai (jours)'] = orders[order]['catalog']['P_URI']['DLVSBART'];
-          storeData['Qualité'] = orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
+          storeData['Qualité'] = orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO'] !== null ? orders[order]['catalog']['P_URI']['Properties']['KEO_PIECO']['VALSBAAA'] : 'Inconnue';
           storeData['Manque à gagner'] = '';
           dataToStore.data.push(storeData);
 
@@ -344,14 +345,14 @@ export class PartView {
           storeData['Référence commande'] = '';
           storeData['Quantité'] = '';
           storeData['Fournisseur'] = this.fournisseurs[orders[order]['catalog']['P_PMC']['FOUSBART']];
-          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['TFASBART']]+ ' '+ orders[order]['catalog']['P_URI']['TFASBART'];
+          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_URI']['TFASBART']] + ' ' + orders[order]['catalog']['P_URI']['TFASBART'];
           let keoEquipPS = orders[order]['catalog']['P_PMC']['Properties']['KEO_EQUIP'];
-          storeData['Equipementier'] =  (keoEquipPS!== undefined && keoEquipPS !== null)?keoEquipPS['VALSBAAA']:'';
+          storeData['Equipementier'] = (keoEquipPS !== undefined && keoEquipPS !== null) ? keoEquipPS['VALSBAAA'] : '';
           storeData['Référence fournisseur'] = orders[order]['catalog']['P_PMC']['REFSBART'];
           storeData['Prix'] = numeral(orders[order]['PMC']).format('0.0)');
           storeData['Délai (jours)'] = orders[order]['catalog']['P_PMC']['DLVSBART'];
 
-          storeData['Qualité'] = orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
+          storeData['Qualité'] = orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO'] !== null ? orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']['VALSBAAA'] : 'Inconnue';
           storeData['Manque à gagner'] = numeral(orders[order]['PMC_MT']).format('0.0)');
           dataToStore.data.push(storeData);
 
@@ -361,20 +362,20 @@ export class PartView {
           storeData['Référence commande'] = '';
           storeData['Quantité'] = '';
           storeData['Fournisseur'] = this.fournisseurs[orders[order]['catalog']['P_PMT']['FOUSBART']];
-          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_PMT']['TFASBART']]+ ' '+ orders[order]['catalog']['P_PMT']['TFASBART'];
+          storeData['Constructeur'] = this.fournisseurs[orders[order]['catalog']['P_PMT']['TFASBART']] + ' ' + orders[order]['catalog']['P_PMT']['TFASBART'];
           let keoEquipPM = orders[order]['catalog']['P_PMT']['Properties']['KEO_EQUIP'];
-          storeData['Equipementier'] =  (keoEquipPM!== undefined && keoEquipPM !== null)?keoEquipPM['VALSBAAA']:'';
+          storeData['Equipementier'] = (keoEquipPM !== undefined && keoEquipPM !== null) ? keoEquipPM['VALSBAAA'] : '';
           storeData['Référence fournisseur'] = orders[order]['catalog']['P_PMT']['REFSBART'];
           storeData['Prix'] = numeral(orders[order]['PMT']).format('0.0)');
           storeData['Délai (jours)'] = orders[order]['catalog']['P_PMT']['DLVSBART'];
 
-          storeData['Qualité'] = orders[order]['catalog']['P_PMT']['Properties']['KEO_PIECO']!==null?orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']['VALSBAAA']:'Inconnue';
+          storeData['Qualité'] = orders[order]['catalog']['P_PMT']['Properties']['KEO_PIECO'] !== null ? orders[order]['catalog']['P_PMC']['Properties']['KEO_PIECO']['VALSBAAA'] : 'Inconnue';
           storeData['Manque à gagner'] = numeral(orders[order]['PMT_MT']).format('0.0)');
           dataToStore.data.push(storeData);
 
         }
-        const file = new Blob([convertArrayOfObjectsToCSV(dataToStore)], { type: 'text/csv' });
-        downloadFile(file, 'Détails des commandes.csv');
+        debugger
+        downloadFile(dataToStore, 'Détails des commandes.csv');
       })
     })
   }
