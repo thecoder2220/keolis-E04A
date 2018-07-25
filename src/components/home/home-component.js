@@ -56,7 +56,8 @@ export class HomeComponent {
 
   @bindable state = 0;
   achatsStatsForExport = [];
-  achatsQualiteStatsForExport = [];
+
+
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
   /* ******************************************************************************************************************* */
@@ -841,7 +842,7 @@ export class HomeComponent {
               dataToStore.data.push(storeData);
             }
           }
-          downloadFile(dataToStore, 'Analyse par pièce.csv');
+          downloadFile(dataToStore, 'Analyse par pièce - Vue Agrégée.csv');
         })
 
       })
@@ -861,38 +862,39 @@ export class HomeComponent {
           headers: {
             'Content-Type': 'application/json'
           },
-          method: 'post',
+          method: 'post'
+          ,
           body: json(parts)
         }).then(response => response.json()).then(data => {
         console.log.apply(console, this.logger.log(data, "Data quality loaded for export csv"));
-        this.achatsQualiteStatsForExport = data.results;
-        let achats = this.achatsStatsForExport;
-        if (achats == null || !achats.length) {
+        let achats =  data;
+        if (achats === null || achats === undefined ) {
+          //if (achats == null || !achats.length) {
           return;
         }
         for (let achat in achats) {
-          let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
-          let refArticle = achats[achat]['main.LignesCommande.Article'];
+          let refFabricant = achat;
+          let refArticle = achats[achat];
           let label = this.partNames[refFabricant];
           if ((label !== undefined) && (label !== null)) {
             let storeData = {};
             storeData['Réf. Fabricant'] = refFabricant;
-            storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+            storeData['Réf. Kapp'] = refArticle['main.LignesCommande.Article'];
             storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
-            storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+            storeData['Quantité achetée'] = refArticle['SomQuantiteFacturee'];
             storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
             storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
             storeData['ORI / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
             storeData['ORI / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['AvgPrixTarif']).format('0.0)');
             storeData['ORF / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
             storeData['ORF / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
-            storeData['PQE / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['PQE']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-            storeData['PQE / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['PQE']['AvgPrixTarif']).format('0.0)');
+            let pqe = this.achatsQualiteStats[refFabricant][refArticle]['PQE'];
+            storeData['PQE / Quantité commandée'] = (pqe !== null && pqe !== undefined)?numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
+            storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined)?numeral(pqe['AvgPrixTarif']).format('0.0)'):'';
             dataToStore.data.push(storeData);
           }
         }
-        const file = new Blob([convertArrayOfObjectsToCSV(dataToStore)], { type: 'text/csv' });
-        downloadFile(file, 'Analyse par pièce.csv');
+        downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
       })
     }
   };
