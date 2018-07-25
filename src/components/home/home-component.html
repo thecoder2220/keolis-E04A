@@ -357,7 +357,7 @@
                 </th>
                 <th scope="col" if.bind="currentView=='Qualité'">PQE <br/>Prix d'achat moyen (€)
                 </th>
-                <th style="background:white; border:1px white">
+                <th style="background:white; border:1px white" if.bind="currentView!='Pièce'" >
                   <div>
                     <button class="btn btn-primary small-button" style="margin:auto " width="20px"
                             click.trigger="exportDatatable()">Exporter
