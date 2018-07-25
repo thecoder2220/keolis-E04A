@@ -8,7 +8,7 @@ import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jstree';
 import numeral from 'numeral';
-import {convertArrayOfObjectsToCSV, downloadFile} from '../../utils'
+import {downloadFile} from '../../utils'
 
 @inject(HttpClient, Echarts, EventAggregator)
 export class HomeComponent {
@@ -56,7 +56,6 @@ export class HomeComponent {
 
   @bindable state = 0;
   achatsStatsForExport = [];
-
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -398,7 +397,6 @@ export class HomeComponent {
   };
 
   loadPartsNamesWithDirectReference(directReference) {
-    debugger;
     let query = {
       "parts": Object.keys(directReference)
     }
@@ -778,7 +776,6 @@ export class HomeComponent {
     dataToStore.data = [];
     dataToStore.lineDelimiter = '\n';
     dataToStore.columnDelimiter = ';';
-    debugger;
     this.http.fetch('/v1/resources/MAGAggregates?rs:format=csv'
       , {
         headers: {
@@ -862,6 +859,7 @@ export class HomeComponent {
 
       })
     } else if (this.currentView === 'Qualité') {
+
       let parts = {
         parts: this.achatsStats.map(function (item) {
           return item["main.LignesCommande.RefFabricant"]
@@ -890,22 +888,34 @@ export class HomeComponent {
           this.partNames = labels;
           for (let achat in achats) {
             let refFabricant = achat;
-            let refArticle = achats[achat];
+            debugger;
+            let refArticle = Object.keys(achats[achat])[0];;
             let label = this.partNames[refFabricant];
             if ((label !== undefined) && (label !== null)) {
               let storeData = {};
               storeData['Réf. Fabricant'] = refFabricant;
-              storeData['Réf. Kapp'] = refArticle['main.LignesCommande.Article'];
+              storeData['Réf. Kapp'] = refArticle;
               storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
-              storeData['Quantité achetée'] = refArticle['SomQuantiteFacturee'];
-              storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
-              storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-              storeData['ORI / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-              storeData['ORI / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['AvgPrixTarif']).format('0.0)');
-              storeData['ORF / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-              storeData['ORF / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
-              let pqe = this.achatsQualiteStats[refFabricant][refArticle]['PQE'];
-              storeData['PQE / Quantité commandée'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+              storeData['Quantité achetée'] = ''; //refArticle['SomQuantiteFacturee'];
+              storeData['Prix d\'achat moyen'] = '';//numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+              storeData['Dépenses totales'] = ''; //numeral(achats[achat]['SomMontantCalc']).format('(0)');
+              let qualitiesForExport = achats[refFabricant][refArticle];
+              let ori = qualitiesForExport['ORI'];
+              //let ori2 = qualitiesForExport.ORI;
+
+              //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
+
+              storeData['ORI / Quantité commandée'] = '';
+                //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
+              storeData['ORI / Prix d\'achat moyen'] = ori!==undefined || ori!==null?numeral(ori['AvgPrixTarif']).format('0.0)'):'';
+              let orf = qualitiesForExport['ORF'];
+              storeData['ORF / Quantité commandée'] =  '';
+                //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+              storeData['ORF / Prix d\'achat moyen'] = orf!==undefined || orf!==null?numeral(orf['AvgPrixTarif']).format('0.0)'):'';
+                //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
+              let pqe = qualitiesForExport['PQE'];
+              storeData['PQE / Quantité commandée'] = '';
+              //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
               storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0)') : '';
               dataToStore.data.push(storeData);
             }
