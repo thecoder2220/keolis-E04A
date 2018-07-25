@@ -252,7 +252,7 @@ export class HomeComponent {
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
-      this.loadPartsNames(this.achatsStats).then(response => {
+      this.loadPartsNames(this.achatsStats, "main.LignesCommande.RefFabricant").then(response => {
         this.partNames = response;
         this.achatsStatsReady = true;
       })
@@ -378,10 +378,10 @@ export class HomeComponent {
   };
 
 
-  loadPartsNames(source) {
+  loadPartsNames(source, reference) {
     let query = {
       "parts": source.map(function (item) {
-        return item["main.LignesCommande.RefFabricant"]
+        return item[reference]
       })
     }
 
@@ -397,6 +397,23 @@ export class HomeComponent {
     })
   };
 
+  loadPartsNamesWithDirectReference(directReference) {
+    debugger;
+    let query = {
+      "parts": Object.keys(directReference)
+    }
+
+    return this.http.fetch('/v1/resources/partName', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'post',
+      body: json(query)
+    }).then(response => response.json()).then(data => {
+      console.log.apply(console, this.logger.log(data, "Data part names loaded"));
+      return data;
+    })
+  };
 
   loadParts(filter, limit) {
     let promise = this.http.fetch('/v1/resources/part?rs:filter=' + filter, {
@@ -785,8 +802,6 @@ export class HomeComponent {
 
 
   exportDatatable() {
-    debugger;
-
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
@@ -814,7 +829,7 @@ export class HomeComponent {
         }).then(response => response.json()).then(data => {
         //console.log.apply(console, this.logger.log(data, "Data achats for export loaded"));
         this.achatsStatsForExport = data.results;
-        this.loadPartsNames(this.achatsStatsForExport).then(labels => {
+        this.loadPartsNames(this.achatsStatsForExport, "main.LignesCommande.RefFabricant").then(labels => {
           this.partNames = labels;
           let achats = this.achatsStatsForExport;
           if (achats == null || !achats.length) {
@@ -852,7 +867,6 @@ export class HomeComponent {
           return item["main.LignesCommande.RefFabricant"]
         })
       };
-      this.achatsQualiteStatsForExport = [];
       this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
         + '&rs:currentPage=' + 1
         + "&rs:pageSize=" + 100
@@ -867,34 +881,37 @@ export class HomeComponent {
           body: json(parts)
         }).then(response => response.json()).then(data => {
         console.log.apply(console, this.logger.log(data, "Data quality loaded for export csv"));
-        let achats =  data;
-        if (achats === null || achats === undefined ) {
+        var achats = data;
+        if (achats === null || achats === undefined) {
           //if (achats == null || !achats.length) {
           return;
         }
-        for (let achat in achats) {
-          let refFabricant = achat;
-          let refArticle = achats[achat];
-          let label = this.partNames[refFabricant];
-          if ((label !== undefined) && (label !== null)) {
-            let storeData = {};
-            storeData['Réf. Fabricant'] = refFabricant;
-            storeData['Réf. Kapp'] = refArticle['main.LignesCommande.Article'];
-            storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
-            storeData['Quantité achetée'] = refArticle['SomQuantiteFacturee'];
-            storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
-            storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-            storeData['ORI / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-            storeData['ORI / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['AvgPrixTarif']).format('0.0)');
-            storeData['ORF / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-            storeData['ORF / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
-            let pqe = this.achatsQualiteStats[refFabricant][refArticle]['PQE'];
-            storeData['PQE / Quantité commandée'] = (pqe !== null && pqe !== undefined)?numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-            storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined)?numeral(pqe['AvgPrixTarif']).format('0.0)'):'';
-            dataToStore.data.push(storeData);
+        this.loadPartsNamesWithDirectReference(achats).then(labels => {
+          this.partNames = labels;
+          for (let achat in achats) {
+            let refFabricant = achat;
+            let refArticle = achats[achat];
+            let label = this.partNames[refFabricant];
+            if ((label !== undefined) && (label !== null)) {
+              let storeData = {};
+              storeData['Réf. Fabricant'] = refFabricant;
+              storeData['Réf. Kapp'] = refArticle['main.LignesCommande.Article'];
+              storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
+              storeData['Quantité achetée'] = refArticle['SomQuantiteFacturee'];
+              storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+              storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
+              storeData['ORI / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+              storeData['ORI / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORI']['AvgPrixTarif']).format('0.0)');
+              storeData['ORF / Quantité commandée'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+              storeData['ORF / Prix d\'achat moyen'] = numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
+              let pqe = this.achatsQualiteStats[refFabricant][refArticle]['PQE'];
+              storeData['PQE / Quantité commandée'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+              storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0)') : '';
+              dataToStore.data.push(storeData);
+            }
           }
-        }
-        downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
+          downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
+        })
       })
     }
   };
