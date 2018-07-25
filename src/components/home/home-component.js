@@ -888,7 +888,6 @@ export class HomeComponent {
           this.partNames = labels;
           for (let achat in achats) {
             let refFabricant = achat;
-            debugger;
             let refArticle = Object.keys(achats[achat])[0];;
             let label = this.partNames[refFabricant];
             if ((label !== undefined) && (label !== null)) {
@@ -907,16 +906,16 @@ export class HomeComponent {
 
               storeData['ORI / Quantité commandée'] = '';
                 //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-              storeData['ORI / Prix d\'achat moyen'] = ori!==undefined || ori!==null?numeral(ori['AvgPrixTarif']).format('0.0)'):'';
+              storeData['ORI / Prix d\'achat moyen'] = ori!==undefined || ori!==null?numeral(ori['AvgPrixTarif']).format('0.0'):'';
               let orf = qualitiesForExport['ORF'];
               storeData['ORF / Quantité commandée'] =  '';
                 //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-              storeData['ORF / Prix d\'achat moyen'] = orf!==undefined || orf!==null?numeral(orf['AvgPrixTarif']).format('0.0)'):'';
+              storeData['ORF / Prix d\'achat moyen'] = orf!==undefined || orf!==null?numeral(orf['AvgPrixTarif']).format('0.0'):'';
                 //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
               let pqe = qualitiesForExport['PQE'];
               storeData['PQE / Quantité commandée'] = '';
               //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
-              storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0)') : '';
+              storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
               dataToStore.data.push(storeData);
             }
           }
