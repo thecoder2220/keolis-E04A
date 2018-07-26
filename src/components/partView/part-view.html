@@ -177,14 +177,14 @@
               <tbody>
                 <tr repeat.for="entry of catalogEntries">
                     <td scope="col" class="${entry['cellCSS'] || ''}"><p title.bind="entry['INTSBART']">${entry['INTSBART'].substring(0,15)}</p></td>
-                    <td scope="col">${fournisseurs[entry["FOUSBART"]]}</td>
-                    <td scope="col">${fournisseurs[entry["TFASBART"]]}</td>
-                    <td scope="col">${entry["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</td>
-                    <td scope="col">${entry["REFSBART"]}</td>
-                    <td scope="col">${entry["PATSBART"]}</td>
-                    <td scope="col">${entry["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
-                    <td scope="col">${(entry["DLVSBART_norm"]!=0)?entry["DLVSBART_norm"]:"NC"}</td>
-                    <td scope="col">
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${fournisseurs[entry["FOUSBART"]]}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${fournisseurs[entry["TFASBART"]]}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${entry["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${entry["REFSBART"]}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${entry["PATSBART"]}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${entry["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">${(entry["DLVSBART_norm"]!=0)?entry["DLVSBART_norm"]:"NC"}</td>
+                    <td scope="col" class="${entry['cellCSS'] || ''}">
                       <span  title.bind="getTopThreeNames(topBuyers[entry['GRPSBART']])" if.bind="credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART']  ]">
                         ${credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART'] ].orders} (${credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART'] ].ratio}%)</span>
                     </td>

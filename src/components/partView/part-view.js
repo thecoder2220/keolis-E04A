@@ -117,7 +117,8 @@ export class PartView {
       this.orderLinesReady = true;
       this.config.totalItems = data.totalItems;
       this.orderLines.map( (item) => {
-        this.URIs.push({refPiece:item.RFBSALCA, P_URI: item.P_URI,PMC_URI: item.PMC_URI,  PMT_URI: item.PMT_URI});
+        debugger
+        this.URIs.push({catalogId:item.DCRSALCA_norm+item.RFBSALCA+item.PVFSALCA, P_URI: item.P_URI,PMC_URI: item.PMC_URI,  PMT_URI: item.PMT_URI});
       })
 
       this.loadFournisseurNames(this.orderLines).then(providers => {
@@ -165,10 +166,10 @@ export class PartView {
   /* ******************************************************************************************************************* */
 
 
-  loadCatalogEntries(orderDate, part, maxPrice) {
+  loadCatalogEntries(orderDate, part, maxPrice) {  //orderDate="2018-05-17" //part="A0004295695"  //maxPrice="22"
   debugger
     for (let piece of this.URIs) {
-      if(piece.refPiece===part) {
+      if(piece.catalogId===orderDate+part+maxPrice) {
         this.P_URI = piece.P_URI;
         this.PMC_URI = piece.PMC_URI;
         this.PMT_URI = piece.PMT_URI;
@@ -191,13 +192,11 @@ export class PartView {
       this.catalogEntries.map( (entry) => {
         if (entry.uri===this.P_URI){
           Object.assign(entry, {'cellCSS': 'table-info'})
+        } else if (entry.P_URI===this.P_URI){
+          Object.assign(entry, {'cellCSS': 'table-warning'})
+        } else if (entry.P_URI===this.P_URI){
+          Object.assign(entry, {'cellCSS': 'table-danger'})
         }
-     /*   if (entry.P_URI===this.P_URI){
-          Object.assign(entry, {'crediblePrice': true})
-        }
-        if (entry.P_URI===this.P_URI){
-          Object.assign(entry, {'minimumPrice': true})
-        }*/
       })
 
       this.loadCredibles(orderDate, part);
@@ -237,14 +236,6 @@ export class PartView {
       this.topBuyers[grp] = data
     })
   };
-
-  /*loadUrisFromSelectedPart(part){
-    debugger
-    this.P_URI=this.URIs[part].P_URI;
-    this.PMC_URI=this.URIs[part].PMC_URI;
-    this.PMT_URI=this.URIs[part].PMT_URI;
-    console.log('toto')
-  }*/
 
   loadCredibles(orderDate, part) {
     this.http.fetch('/v1/resources/credible?rs:orderDate=' + orderDate + '&rs:PART=' + part, {

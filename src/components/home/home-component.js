@@ -414,6 +414,7 @@ export class HomeComponent {
   };
 
   loadParts(filter, limit) {
+    let toto = '/v1/resources/part?rs:filter=' + filter;
     let promise = this.http.fetch('/v1/resources/part?rs:filter=' + filter, {
       headers: {
         'Content-Type': 'application/json'
