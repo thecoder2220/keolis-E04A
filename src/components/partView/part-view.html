@@ -3,14 +3,15 @@
 
   <div class="row">
     <div class="col-12" style="height:300px;">
-      <img src="../static/throbber.gif" show.bind="!fournisseurIsReady" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)"/>
+      <img src="../static/throbber.gif" show.bind="!fournisseurIsReady"
+           style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)"/>
       <div id="fournisseurDiagram" ref="fournisseurDiagram" style="width: 100%;height:100%;"></div>
     </div>
   </div>
 
   <div style="margin-top: 10px">
     <nav aria-label="Page navigation example">
-      <ul class="pagination" >
+      <ul class="pagination">
         <li class="page-item">
           <a class="page-link" href="#" click.trigger="setPage(-1)">Pr&eacute;c.</a>
         </li>
@@ -40,106 +41,131 @@
       <small>
         <table class="table table-responsive-sm table-hover">
           <thead class="thead-dark">
-            <tr>
-              <th scope="col">Date</th>
-              <th scope="col">Filiale</th>
-              <th scope="col">R&eacute;f&eacute;rence commande</th>
-              <th scope="col">Quantit&eacute;</th>
-              <th scope="col">Fournisseur</th>
-              <th scope="col">Constructeur</th>
-              <th scope="col">Equipementier</th>
-              <th scope="col">R&eacute;ference fournisseur</th>
-              <th scope="col">Prix (€)</th>
-              <th scope="col">D&eacute;lai (jours)</th>
-              <th scope="col">Qualit&eacute;</th>
-              <th scope="col">Manque &agrave; gagner (€)</th>
-              <th scope="col">Catalogue</th>
-              <th style="background:white; border:2px white; position:relative;bottom:-8px;padding-bottom:20px;" >
-                <div>
-                  <button class="btn btn-primary small-button" style="margin:auto " width="20px" click.trigger="exportOrderDetails()">Exporter</button>
-                </div>
-              </th>
-            </tr>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Filiale</th>
+            <th scope="col">R&eacute;f&eacute;rence commande</th>
+            <th scope="col">Quantit&eacute;</th>
+            <th scope="col">Fournisseur</th>
+            <th scope="col">Constructeur</th>
+            <th scope="col">Equipementier</th>
+            <th scope="col">R&eacute;ference fournisseur</th>
+            <th scope="col">Prix (€)</th>
+            <th scope="col">D&eacute;lai (jours)</th>
+            <th scope="col">Qualit&eacute;</th>
+            <th scope="col">Manque &agrave; gagner (€)</th>
+            <th scope="col">Catalogue</th>
+            <th
+              style="background:white; border:2px white; position:relative;bottom:-8px;padding-bottom:20px;">
+              <div>
+                <button class="btn btn-primary small-button" style="margin:auto " width="20px"
+                        click.trigger="exportOrderDetails()">Exporter
+                </button>
+              </div>
+            </th>
+          </tr>
           </thead>
 
           <tbody show.bind="!orderLinesReady">
-            <tr>
-              <td>
-                <img src="../static/throbber.gif"/>
-              </td>
-            </tr>
+          <tr>
+            <td>
+              <img src="../static/throbber.gif"/>
+            </td>
+          </tr>
           </tbody>
           <tbody repeat.for="order of orderLines">
-            <tr>
-              <td scope="col" class="table-info">
-                <b>${order["DCRSALCA_norm"]}</b>
-              </td>
-              <td scope="col" class="table-info">${etablissements[order["ETSSALCA"]].name}</td>
-              <td scope="col" class="table-info">
-                <b>${order["NUISALCA"]}</b>
-              </td>
-              <td scope="col" class="table-info">
-                <b>${order["QTFSALCA_norm"]}</b>
-              </td>
-              <td scope="col" class="table-info">
-                <b>${fournisseurs[order["catalog"]["P_URI"]["FOUSBART"]]} </b>
-              </td>
-              <th scope="col" class="table-info">
-                <b>${fournisseurs[order["catalog"]["P_URI"]["TFASBART"]]} (${order["catalog"]["P_URI"]["TFASBART"]})</b>
-              </th>
-              <th scope="col" class="table-info">
-                <b>${order["catalog"]["P_URI"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</b>
-              </th>
-              <td scope="col" class="table-info">
-                <b>${order["catalog"]["P_URI"]["REFSBART"]}</b>
-              </td>
-              <td scope="col" class="table-info">
-                <b>${order["PVFSALCA"]}</b>
-              </td>
-              <td scope="col" class="table-info">
-                <b>${order["catalog"]["P_URI"]["DLVSBART"]}</b>
-              </td>
-              <td scope="col" class="table-info">
-                <b>${(order["catalog"]["P_URI"]["Properties"]["KEO_PIECO"]!=null)?order["catalog"]["P_URI"]["Properties"]["KEO_PIECO"]["VALSBAAA"]:"Inconnue"}</b>
-              </td>
-              <td scope="col" class="table-info"></td>
-          
-              <td scope="col" class="table-info">
-                <a href="#" data-toggle="modal" data-target="#exampleModalLong" class="badge badge-info" click.trigger="loadCatalogEntries(order['DCRSALCA_norm'],order['RFBSALCA'],order['PVFSALCA'])">D&eacute;tails catalogue</a>
-              </td>
-            </tr>
+          <tr>
+            <td scope="col" class="table-info">
+              <b>${order["DCRSALCA_norm"]}</b>
+            </td>
+            <td scope="col" class="table-info">${etablissements[order["ETSSALCA"]].name}</td>
+            <td scope="col" class="table-info">
+              <b>${order["NUISALCA"]}</b>
+            </td>
+            <td scope="col" class="table-info">
+              <b>${order["QTFSALCA_norm"]}</b>
+            </td>
+            <td scope="col" class="table-info">
+              <b>${fournisseurs[order["catalog"]["P_URI"]["FOUSBART"]]} </b>
+            </td>
+            <th scope="col" class="table-info">
+              <b>${fournisseurs[order["catalog"]["P_URI"]["TFASBART"]]}
+                (${order["catalog"]["P_URI"]["TFASBART"]})</b>
+            </th>
+            <th scope="col" class="table-info">
+              <b>${order["catalog"]["P_URI"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</b>
+            </th>
+            <td scope="col" class="table-info">
+              <b>${order["catalog"]["P_URI"]["REFSBART"]}</b>
+            </td>
+            <td scope="col" class="table-info">
+              <b>${order["PVFSALCA"]}</b>
+            </td>
+            <td scope="col" class="table-info">
+              <b>${order["catalog"]["P_URI"]["DLVSBART"]}</b>
+            </td>
+            <td scope="col" class="table-info">
+              <b>${(order["catalog"]["P_URI"]["Properties"]["KEO_PIECO"]!=null)?order["catalog"]["P_URI"]["Properties"]["KEO_PIECO"]["VALSBAAA"]:"Inconnue"}</b>
+            </td>
+            <td scope="col" class="table-info"></td>
 
-            <tr>
-              <td colspan="4" class="table-warning">
-                <center>
-                  <i>Prix Cr&eacute;dible</i>
-                </center>
-              </td>
-              <td scope="col" class="table-warning">${fournisseurs[order["catalog"]["P_PMC"]["FOUSBART"]]}</td>
-              <th scope="col" class="table-warning">${fournisseurs[order["catalog"]["P_PMC"]["TFASBART"]]} (${order["catalog"]["P_PMC"]["TFASBART"]})</th>
-              <th scope="col" class="table-warning">${order["catalog"]["P_PMC"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</th>
-              <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["REFSBART"]}</td>
-              <td scope="col" class="table-warning">${order["PMC"] | numberFormat:'0.0)'}</td>
-              <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["DLVSBART"]}</td>
-              <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
-              <td scope="col" class="table-warning">${order["PMC_MT"] | numberFormat:'0.0)'}</td>
-              <td scope="col"> </td>
-            </tr>
-            <tr>
-              <td colspan="4" class="table-danger">
-                <center>
-                  <i>Prix Minimal</i>
-                </center>
-              </td>
-              <td scope="col" class="table-danger">${fournisseurs[order["catalog"]["P_PMT"]["FOUSBART"]]} </td>
-              <th scope="col" class="table-danger">${fournisseurs[order["catalog"]["P_PMT"]["TFASBART"]]} (${order["catalog"]["P_PMT"]["TFASBART"]})</th>
-              <th scope="col" class="table-danger">${order["catalog"]["P_PMT"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</th>
-              <td scope="col" class="table-danger">${order["catalog"]["P_PMT"]["REFSBART"]}</td>
-              <td scope="col" class="table-danger">${order["PMT"] | numberFormat:'0.0)'}</td>
-              <td scope="col" class="table-danger">${order["catalog"]["P_PMT"]["DLVSBART"]}</td>
-              <td scope="col" class="table-danger">${order["catalog"]["P_PMT"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
-              <td scope="col" class="table-danger">${order["PMT_MT"] | numberFormat:'0.0)'}</td>
-            </tr>
+            <td scope="col" class="table-info">
+              <a href="#" data-toggle="modal" data-target="#exampleModalLong"
+                 class="badge badge-info"
+                 click.trigger="loadCatalogEntries(order['DCRSALCA_norm'],order['RFBSALCA'],order['PVFSALCA'])">D&eacute;tails
+                catalogue</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="4" class="table-warning">
+              <center>
+                <i>Prix Cr&eacute;dible</i>
+              </center>
+            </td>
+            <td scope="col" class="table-warning">
+              ${fournisseurs[order["catalog"]["P_PMC"]["FOUSBART"]]}
+            </td>
+            <th scope="col" class="table-warning">
+              ${fournisseurs[order["catalog"]["P_PMC"]["TFASBART"]]}
+              (${order["catalog"]["P_PMC"]["TFASBART"]})
+            </th>
+            <th scope="col" class="table-warning">
+              ${order["catalog"]["P_PMC"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}
+            </th>
+            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["REFSBART"]}</td>
+            <td scope="col" class="table-warning">${order["PMC"] | numberFormat:'0.0)'}</td>
+            <td scope="col" class="table-warning">${order["catalog"]["P_PMC"]["DLVSBART"]}</td>
+            <td scope="col" class="table-warning">
+              ${order["catalog"]["P_PMC"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}
+            </td>
+            <td scope="col" class="table-warning">${order["PMC_MT"] | numberFormat:'0.0)'}</td>
+            <td scope="col"></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="table-danger">
+              <center>
+                <i>Prix Minimal</i>
+              </center>
+            </td>
+            <td scope="col" class="table-danger">
+              ${fournisseurs[order["catalog"]["P_PMT"]["FOUSBART"]]}
+            </td>
+            <th scope="col" class="table-danger">
+              ${fournisseurs[order["catalog"]["P_PMT"]["TFASBART"]]}
+              (${order["catalog"]["P_PMT"]["TFASBART"]})
+            </th>
+            <th scope="col" class="table-danger">
+              ${order["catalog"]["P_PMT"]["Properties"]["KEO_EQUIP"]["VALSBAAA"]}
+            </th>
+            <td scope="col" class="table-danger">${order["catalog"]["P_PMT"]["REFSBART"]}</td>
+            <td scope="col" class="table-danger">${order["PMT"] | numberFormat:'0.0)'}</td>
+            <td scope="col" class="table-danger">${order["catalog"]["P_PMT"]["DLVSBART"]}</td>
+            <td scope="col" class="table-danger">
+              ${order["catalog"]["P_PMT"]["Properties"]["KEO_PIECO"]["VALSBAAA"]}
+            </td>
+            <td scope="col" class="table-danger">${order["PMT_MT"] | numberFormat:'0.0)'}</td>
+          </tr>
 
           </tbody>
         </table>
@@ -148,7 +174,8 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog"
+       aria-labelledby="exampleModalLongTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -161,34 +188,51 @@
           <small>
             <table class="table table-responsive-sm table-hover">
               <thead>
-                <tr>
-                  <th scope="col">Libellé</th>
-                  <th scope="col">Fournisseur</th>
-                  <th scope="col">Constructeur</th>
-                  <th scope="col">Equipementier</th>
-                  <th scope="col">R&eacute;f. fournisseur</th>
-                  <th scope="col">Prix (€)</th>
-                  <th scope="col">Qualit&eacute;</th>
-                  <th scope="col">Délai de livraison (jours)</th>
-                  <th scope="col">Quantité achetée au fournisseur par le groupe</th>
-                </tr>
+              <tr>
+                <th scope="col">Libellé</th>
+                <th scope="col">Fournisseur</th>
+                <th scope="col">Constructeur</th>
+                <th scope="col">Equipementier</th>
+                <th scope="col">R&eacute;f. fournisseur</th>
+                <th scope="col">Prix (€)</th>
+                <th scope="col">Qualit&eacute;</th>
+                <th scope="col">Délai de livraison (jours)</th>
+                <th scope="col">Quantité achetée au fournisseur par le groupe</th>
+              </tr>
               </thead>
 
               <tbody>
-                <tr repeat.for="entry of catalogEntries">
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}"><p title.bind="entry['INTSBART']">${entry['INTSBART'].substring(0,15)}</p></td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${fournisseurs[entry["FOUSBART"]]}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${fournisseurs[entry["TFASBART"]]}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${entry["Properties"]["KEO_EQUIP"]["VALSBAAA"]}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${entry["REFSBART"]}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${entry["PATSBART"]}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${entry["Properties"]["KEO_PIECO"]["VALSBAAA"]}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">${(entry["DLVSBART_norm"]!=0)?entry["DLVSBART_norm"]:"NC"}</td>
-                    <td title="${entry['CSStooltip']}" scope="col" class="${entry['CSScell'] || ''}">
-                      <span  title.bind="getTopThreeNames(topBuyers[entry['GRPSBART']])" if.bind="credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART']  ]">
+              <tr repeat.for="entry of catalogEntries">
+
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}"><p
+                  title.bind="entry['INTSBART']">${entry['INTSBART'].substring(0,15)}</p></td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${fournisseurs[entry["FOUSBART"]]}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${fournisseurs[entry["TFASBART"]]}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${entry["Properties"]["KEO_EQUIP"]["VALSBAAA"]}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${entry["REFSBART"]}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${entry["PATSBART"]}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${entry["Properties"]["KEO_PIECO"]["VALSBAAA"]}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                  ${(entry["DLVSBART_norm"]!=0)?entry["DLVSBART_norm"]:"NC"}
+                </td>
+                <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}">
+                      <span title.bind="getTopThreeNames(topBuyers[entry['GRPSBART']])"
+                            if.bind="credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART']  ]">
                         ${credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART'] ].orders} (${credibles.fou[entry['GRPSBART'] + '#' + entry['REFSBART'] ].ratio}%)</span>
-                    </td>
-                </tr>
+                </td>
+              </tr>
               </tbody>
 
             </table>

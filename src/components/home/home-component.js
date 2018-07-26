@@ -191,6 +191,7 @@ export class HomeComponent {
 
 
   resetDate() {
+
     let endDate = new Date()
     let startDate = new Date()
     startDate.setMonth(endDate.getMonth() - 12)
@@ -205,6 +206,33 @@ export class HomeComponent {
     this.preSelected.endDate.year = endYear.toString();
     this.preSelected.endDate.month = endMonth;
     this.preSelected.endDate.day = "01";
+
+   /* debugger
+
+    let now = new Date();
+    let startDate = new Date();
+    const today=now.getDate();
+    let nowYear = now.getFullYear()
+    if (today<15){
+      startDate = new Date(now.getFullYear(), now.getMonth()-2, 1);
+    } else {
+      startDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    }
+
+    let endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+
+    let endMonth = (endDate.getMonth() + 2 > 9) ? endDate.getMonth() + 2 : "0".concat(endDate.getMonth() + 2)
+    let endYear = endDate.getFullYear()
+    let startMonth = (startDate.getMonth() + 1 > 9) ? startDate.getMonth() + 1 : "0".concat(startDate.getMonth() + 1)
+    let startYear = startDate.getFullYear()
+
+    this.preSelected.startDate.year = startYear.toString();
+    this.preSelected.startDate.month = startMonth;
+    this.preSelected.startDate.day = "01";
+    this.preSelected.endDate.year = endYear.toString();
+    this.preSelected.endDate.month = endMonth;
+    this.preSelected.endDate.day = endDate.getDate().toString(); //"01";
+    let toto='';*/
   };
 
 
@@ -223,6 +251,7 @@ export class HomeComponent {
 
 
   loadAchatsStats() {
+
     this.achatsStats = [];
     this.achatsStatsReady = false;
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
@@ -231,7 +260,13 @@ export class HomeComponent {
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
-
+   /* const totot ='/v1/resources/achatsStats2?rs:default=' + part + ets
+    + '&rs:currentPage=' + this.currentPage
+    + "&rs:pageSize=" + this.config.pageSize
+    + "&rs:startDate=" + startDate
+    + "&rs:endDate=" + endDate
+    + "&rs:sort=" + this.sortField
+    + "&rs:minQuantity=" + this.filter.minQuantity*/
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
