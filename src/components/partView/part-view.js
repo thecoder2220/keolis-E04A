@@ -42,7 +42,10 @@ export class PartView {
   @bindable filter;
   @bindable part;
   orderLinesForExport = [];
-
+  URIs=[];
+  @bindable P_URI="";
+  @bindable PMC_URI="";
+  @bindable PMT_URI="";
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -113,6 +116,10 @@ export class PartView {
       this.orderLines = data.results;
       this.orderLinesReady = true;
       this.config.totalItems = data.totalItems;
+      this.orderLines.map( (item) => {
+        this.URIs.push({refPiece:item.RFBSALCA, P_URI: item.P_URI,PMC_URI: item.PMC_URI,  PMT_URI: item.PMT_URI});
+      })
+
       this.loadFournisseurNames(this.orderLines).then(providers => {
         this.fournisseurs = providers;
         this.getCurrentETSNames();
@@ -159,7 +166,16 @@ export class PartView {
 
 
   loadCatalogEntries(orderDate, part, maxPrice) {
-    this.http.fetch('/v1/resources/catalog?rs:PART=' + part
+  debugger
+    for (let piece of this.URIs) {
+      if(piece.refPiece===part) {
+        this.P_URI = piece.P_URI;
+        this.PMC_URI = piece.PMC_URI;
+        this.PMT_URI = piece.PMT_URI;
+        break;
+      }
+    }
+    this.http.fetch('/v1/resources/catalog?rs:PART=' + part    // part = A0004295695
       + '&rs:orderDate=' + orderDate
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize +
@@ -172,6 +188,18 @@ export class PartView {
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data catalogue loaded"));
       this.catalogEntries = data;
+      this.catalogEntries.map( (entry) => {
+        if (entry.uri===this.P_URI){
+          Object.assign(entry, {'cellCSS': 'table-info'})
+        }
+     /*   if (entry.P_URI===this.P_URI){
+          Object.assign(entry, {'crediblePrice': true})
+        }
+        if (entry.P_URI===this.P_URI){
+          Object.assign(entry, {'minimumPrice': true})
+        }*/
+      })
+
       this.loadCredibles(orderDate, part);
       this.loadFournisseurNames(this.orderLines).then(providers => {
         this.fournisseurs = providers;
@@ -210,6 +238,13 @@ export class PartView {
     })
   };
 
+  /*loadUrisFromSelectedPart(part){
+    debugger
+    this.P_URI=this.URIs[part].P_URI;
+    this.PMC_URI=this.URIs[part].PMC_URI;
+    this.PMT_URI=this.URIs[part].PMT_URI;
+    console.log('toto')
+  }*/
 
   loadCredibles(orderDate, part) {
     this.http.fetch('/v1/resources/credible?rs:orderDate=' + orderDate + '&rs:PART=' + part, {
@@ -248,7 +283,6 @@ export class PartView {
         },
         method: 'get'
       }).then(response => response.json()).then(data => {
-      debugger
       this.fournisseurIsReady = true;
       $("div#fournisseurDiagram").removeClass('hidden');
 
@@ -289,8 +323,6 @@ export class PartView {
   };
 
   exportOrderDetails() {
-    debugger;
-
     var ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
@@ -374,7 +406,6 @@ export class PartView {
           dataToStore.data.push(storeData);
 
         }
-        debugger
         downloadFile(dataToStore, 'Détails des commandes.csv');
       })
     })
