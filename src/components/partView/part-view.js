@@ -42,10 +42,10 @@ export class PartView {
   @bindable filter;
   @bindable part;
   orderLinesForExport = [];
-  URIs=[];
-  @bindable P_URI="";
-  @bindable PMC_URI="";
-  @bindable PMT_URI="";
+  URIs = [];
+  @bindable P_URI = "";
+  @bindable PMC_URI = "";
+  @bindable PMT_URI = "";
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -94,6 +94,7 @@ export class PartView {
 
 
   loadPArtOrderLines() {
+    this.URIs=[];
     var ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
@@ -116,9 +117,13 @@ export class PartView {
       this.orderLines = data.results;
       this.orderLinesReady = true;
       this.config.totalItems = data.totalItems;
-      this.orderLines.map( (item) => {
-        debugger
-        this.URIs.push({catalogId:item.DCRSALCA_norm+item.RFBSALCA+item.PVFSALCA, P_URI: item.P_URI,PMC_URI: item.PMC_URI,  PMT_URI: item.PMT_URI});
+      this.orderLines.map((item) => {
+        this.URIs.push({
+          catalogId: item.DCRSALCA_norm + item.RFBSALCA + item.PVFSALCA,
+          P_URI: item.P_URI,
+          PMC_URI: item.PMC_URI,
+          PMT_URI: item.PMT_URI
+        });
       })
 
       this.loadFournisseurNames(this.orderLines).then(providers => {
@@ -166,17 +171,17 @@ export class PartView {
   /* ******************************************************************************************************************* */
 
 
-  loadCatalogEntries(orderDate, part, maxPrice) {  //orderDate="2018-05-17" //part="A0004295695"  //maxPrice="22"
-  debugger
+  loadCatalogEntries(orderDate, part, maxPrice) {  // exemple => orderDate="2018-05-17" //part="A0004295695"  //maxPrice="22"
+
     for (let piece of this.URIs) {
-      if(piece.catalogId===orderDate+part+maxPrice) {
+      if (piece.catalogId === orderDate + part + maxPrice) {
         this.P_URI = piece.P_URI;
         this.PMC_URI = piece.PMC_URI;
         this.PMT_URI = piece.PMT_URI;
         break;
       }
     }
-    this.http.fetch('/v1/resources/catalog?rs:PART=' + part    // part = A0004295695
+    this.http.fetch('/v1/resources/catalog?rs:PART=' + part
       + '&rs:orderDate=' + orderDate
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize +
@@ -189,14 +194,26 @@ export class PartView {
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data catalogue loaded"));
       this.catalogEntries = data;
-      this.catalogEntries.map( (entry) => {
-        if (entry.uri===this.P_URI){
-          Object.assign(entry, {'cellCSS': 'table-info'})
-        } else if (entry.P_URI===this.P_URI){
-          Object.assign(entry, {'cellCSS': 'table-warning'})
-        } else if (entry.P_URI===this.P_URI){
-          Object.assign(entry, {'cellCSS': 'table-danger'})
+      this.catalogEntries.map((entry) => {
+        let tooltipContent = ''
+        const separator = ', ';
+        if (entry.uri === this.PMT_URI) {
+          Object.assign(entry, {'CSScell': 'table-danger'})
+          tooltipContent = tooltipContent + 'Prix minimum';
         }
+        if (entry.uri === this.PMC_URI) {
+          Object.assign(entry, {'CSScell': 'table-warning'})
+          tooltipContent = 'Prix crédible' + separator  + tooltipContent;
+        }
+        if (entry.uri === this.P_URI) {
+          Object.assign(entry, {'CSScell': 'table-info'})
+          tooltipContent =  'Prix acheté' + separator + tooltipContent ;
+        }
+
+        if (tooltipContent.endsWith(separator)) {
+          tooltipContent = tooltipContent.slice(0, -2)
+        }
+        Object.assign(entry, {'CSStooltip': tooltipContent})
       })
 
       this.loadCredibles(orderDate, part);
@@ -206,7 +223,9 @@ export class PartView {
           this.loadTopThree(orderDate, part, entry.GRPSBART)
         }
       })
-
+      this.P_URI ="";
+      this.PMC_URI = "";
+      this.PMT_URI = "";
 
     })
   };
