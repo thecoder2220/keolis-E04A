@@ -90,6 +90,7 @@ export class HomeComponent {
   };
 
   loadUserProfile() {
+    debugger
     this.http.fetch('/v1/resources/login', {
       headers: {
         'Content-Type': 'application/json'
@@ -192,47 +193,62 @@ export class HomeComponent {
 
   resetDate() {
 
-    let endDate = new Date()
-    let startDate = new Date()
-    startDate.setMonth(endDate.getMonth() - 12)
-    let endMonth = (endDate.getMonth() + 1 > 9) ? endDate.getMonth() + 1 : "0".concat(endDate.getMonth() + 1)
-    let endYear = endDate.getFullYear()
-    let startMonth = (startDate.getMonth() + 1 > 9) ? startDate.getMonth() + 1 : "0".concat(startDate.getMonth() + 1)
-    let startYear = startDate.getFullYear()
-
-    this.preSelected.startDate.year = startYear.toString();
-    this.preSelected.startDate.month = startMonth;
-    this.preSelected.startDate.day = "01";
-    this.preSelected.endDate.year = endYear.toString();
-    this.preSelected.endDate.month = endMonth;
-    this.preSelected.endDate.day = "01";
-
-   /* debugger
-
+    // pour test =>         let now = new Date(2018, 0, 15);
     let now = new Date();
-    let startDate = new Date();
-    const today=now.getDate();
-    let nowYear = now.getFullYear()
-    if (today<15){
-      startDate = new Date(now.getFullYear(), now.getMonth()-2, 1);
+    let startMonth = {};
+    let endMonth = {};
+    let endYear = {};
+    let startYear = now.getFullYear();
+    const today = now.getDate();
+    console.log("today=", today);
+    const currentMonth = now.getMonth();
+    if (currentMonth > 2) {
+      if (today < 15) {
+        startMonth = now.getMonth() - 2;
+      } else {
+        startMonth = now.getMonth() - 1;
+      }
     } else {
-      startDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      if (currentMonth === 0) {
+        if (today < 15) {
+          startMonth = 10;
+          startYear = now.getFullYear() - 1;
+        } else {
+          startMonth = 11;
+          startYear = now.getFullYear() - 1;
+        }
+      } else if (currentMonth === 1) {
+        if (today < 15) {
+          startMonth = 11;
+          startYear = now.getFullYear() - 1;
+        } else {
+          startMonth = 0;
+        }
+      }
+    }
+    if(startMonth === 11) {
+      console.log("if(startMonth === 11)")
+      endMonth = 0;
+      endYear = startYear +1 ;
+
+
+    } else {
+      console.log("if(startMonth !== 11)");
+      console.log("startMonth =", startMonth);
+      endMonth = startMonth +1;
+      console.log("endMonth =", endMonth)
+      endYear = startYear ;
     }
 
-    let endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
-
-    let endMonth = (endDate.getMonth() + 2 > 9) ? endDate.getMonth() + 2 : "0".concat(endDate.getMonth() + 2)
-    let endYear = endDate.getFullYear()
-    let startMonth = (startDate.getMonth() + 1 > 9) ? startDate.getMonth() + 1 : "0".concat(startDate.getMonth() + 1)
-    let startYear = startDate.getFullYear()
+    let startMonthString = startMonth > 9 ? startMonth.toString() : "0".concat(startMonth );
+    let endMonthString = endMonth > 9 ? (endMonth).toString() : "0".concat(endMonth);
 
     this.preSelected.startDate.year = startYear.toString();
-    this.preSelected.startDate.month = startMonth;
+    this.preSelected.startDate.month = startMonthString;
     this.preSelected.startDate.day = "01";
     this.preSelected.endDate.year = endYear.toString();
-    this.preSelected.endDate.month = endMonth;
-    this.preSelected.endDate.day = endDate.getDate().toString(); //"01";
-    let toto='';*/
+    this.preSelected.endDate.month = endMonthString;
+    this.preSelected.endDate.day = "01";
   };
 
 
@@ -260,13 +276,13 @@ export class HomeComponent {
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
-   /* const totot ='/v1/resources/achatsStats2?rs:default=' + part + ets
-    + '&rs:currentPage=' + this.currentPage
-    + "&rs:pageSize=" + this.config.pageSize
-    + "&rs:startDate=" + startDate
-    + "&rs:endDate=" + endDate
-    + "&rs:sort=" + this.sortField
-    + "&rs:minQuantity=" + this.filter.minQuantity*/
+    /* const totot ='/v1/resources/achatsStats2?rs:default=' + part + ets
+     + '&rs:currentPage=' + this.currentPage
+     + "&rs:pageSize=" + this.config.pageSize
+     + "&rs:startDate=" + startDate
+     + "&rs:endDate=" + endDate
+     + "&rs:sort=" + this.sortField
+     + "&rs:minQuantity=" + this.filter.minQuantity*/
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -544,11 +560,13 @@ export class HomeComponent {
         var actSecteur = actDR[listSecteur[secteur]];
         var childrenSecteur = [];
         for (var filiale = 0; filiale < actSecteur.length; filiale++) {
-          if (actSecteur[filiale]['IDQualiac'] != '170')
+
+          if (actSecteur[filiale]['IDQualiac'] != '170') {
             childrenSecteur.push({
               'text': actSecteur[filiale]['filiale'],
               'id': actSecteur[filiale]['IDQualiac']
             });
+          }
           else
             childrenSecteur.push({
               'text': actSecteur[filiale]['filiale'],
@@ -556,32 +574,39 @@ export class HomeComponent {
               'id': actSecteur[filiale]['IDQualiac']
             });
         }
-        var newSecteur = {'text': listSecteur[secteur], 'children': childrenSecteur};
+        debugger
+        var newSecteur = {
+          'id': listSecteur[secteur],
+          'text': listSecteur[secteur],
+          'children': childrenSecteur
+        };
         childrenDR.push(newSecteur);
       }
-      var newDR = {'text': listDR[DR], 'children': childrenDR};
+      var newDR = {'id': listDR[DR], 'text': listDR[DR], 'children': childrenDR};
       myData.push(newDR);
     }
     myData = {
-      'text': 'Toutes les filiales',
-      'state': {'opened': true, 'selected': true},
-      'children': myData
+      id: '170',
+      text: 'Toutes les filiales',
+      state: {'opened': true, 'selected': false},
+      children: myData
     };
     me.initMultiSelectTree(myData, me);
   };
 
 
   initMultiSelectTree(myData, me) {
+
     // Création modal filiale
     $('#multiselectTreeFiliale').jstree({
       'plugins': ['search', 'checkbox'],
       'core': {
         'data': myData,
-        "themes": {
-          "icons": false,
-          "dots": false
+        'themes': {
+          'icons': false,
+          'dots': false
         },
-        "expand_selected_onload": false
+        'expand_selected_onload': false
       },
       'search': {
         'show_only_matches': true,
@@ -591,6 +616,11 @@ export class HomeComponent {
 
     $('#searchFiliale').on("keyup change", function () {
       $('#multiselectTreeFiliale').jstree(true).search($(this).val())
+    });
+
+    $('#multiselectTreeFiliale').on('loaded.jstree', function () {
+      $("#multiselectTreeFiliale").jstree().select_node(['170', 'Grands Urbains'])
+      //$('#someTree').jstree('select_node', 'Grands Urbains');
     });
 
     $('#multiselectTreeFiliale').on('changed.jstree', function (e, data) {
@@ -671,11 +701,17 @@ export class HomeComponent {
 
 
   loadEcartMoyen() {
+
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
+    let toto = '/v1/resources/ecartAchatMoyen?rs:part=' + ets
+      + '&rs:currentPage=' + this.currentPage
+      + "&rs:pageSize=" + this.config.pageSize
+      + "&rs:startDate=" + startDate
+      + "&rs:endDate=" + endDate
     this.http.fetch('/v1/resources/ecartAchatMoyen?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -722,7 +758,7 @@ export class HomeComponent {
 
     this.diagramIsReady = false;
     $("div#mainDiagram1").addClass('hidden');
-
+    debugger
     this.http.fetch('/v1/resources/yearStats?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -924,7 +960,8 @@ export class HomeComponent {
           this.partNames = labels;
           for (let achat in achats) {
             let refFabricant = achat;
-            let refArticle = Object.keys(achats[achat])[0];;
+            let refArticle = Object.keys(achats[achat])[0];
+            ;
             let label = this.partNames[refFabricant];
             if ((label !== undefined) && (label !== null)) {
               let storeData = {};
@@ -941,13 +978,13 @@ export class HomeComponent {
               //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
 
               storeData['ORI / Quantité commandée'] = '';
-                //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-              storeData['ORI / Prix d\'achat moyen'] = ori!==undefined || ori!==null?numeral(ori['AvgPrixTarif']).format('0.0'):'';
+              //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
+              storeData['ORI / Prix d\'achat moyen'] = ori !== undefined || ori !== null ? numeral(ori['AvgPrixTarif']).format('0.0') : '';
               let orf = qualitiesForExport['ORF'];
-              storeData['ORF / Quantité commandée'] =  '';
-                //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-              storeData['ORF / Prix d\'achat moyen'] = orf!==undefined || orf!==null?numeral(orf['AvgPrixTarif']).format('0.0'):'';
-                //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
+              storeData['ORF / Quantité commandée'] = '';
+              //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+              storeData['ORF / Prix d\'achat moyen'] = orf !== undefined || orf !== null ? numeral(orf['AvgPrixTarif']).format('0.0') : '';
+              //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
               let pqe = qualitiesForExport['PQE'];
               storeData['PQE / Quantité commandée'] = '';
               //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
