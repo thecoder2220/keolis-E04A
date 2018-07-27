@@ -44,6 +44,7 @@ export class HomeComponent {
     "part": null,
     "startDate": {'month': '01', 'year': '2017'},
     "endDate": {'month': '12', 'year': '2017'},
+    "endDateForGraph": {'month': '12', 'year': '2017'},
     "minQuantity": 0
   };
   @bindable preSelected = {
@@ -51,6 +52,7 @@ export class HomeComponent {
     "part": null,
     "startDate": {'month': '01', 'year': '2017'},
     "endDate": {'month': '12', 'year': '2017'},
+    "endDateForGraph": {'month': '12', 'year': '2017'},
     "minQuantity": 0
   };
 
@@ -193,14 +195,13 @@ export class HomeComponent {
 
   resetDate() {
 
-    // pour test =>         let now = new Date(2018, 0, 15);
-    let now = new Date();
+    // pour test => let now = new Date(2018, 0, 14);
+   let now = new Date();
     let startMonth = {};
     let endMonth = {};
     let endYear = {};
     let startYear = now.getFullYear();
     const today = now.getDate();
-    console.log("today=", today);
     const currentMonth = now.getMonth();
     if (currentMonth > 2) {
       if (today < 15) {
@@ -230,8 +231,6 @@ export class HomeComponent {
       console.log("if(startMonth === 11)")
       endMonth = 0;
       endYear = startYear +1 ;
-
-
     } else {
       console.log("if(startMonth !== 11)");
       console.log("startMonth =", startMonth);
@@ -240,15 +239,18 @@ export class HomeComponent {
       endYear = startYear ;
     }
 
-    let startMonthString = startMonth > 9 ? startMonth.toString() : "0".concat(startMonth );
-    let endMonthString = endMonth > 9 ? (endMonth).toString() : "0".concat(endMonth);
+    let startMonthString = (startMonth+1) > 9 ? (startMonth+1).toString() : "0".concat(startMonth+1 );
+    let endMonthString = (endMonth+1) > 9 ? (endMonth+1).toString() : "0".concat(endMonth+1);
 
     this.preSelected.startDate.year = startYear.toString();
     this.preSelected.startDate.month = startMonthString;
     this.preSelected.startDate.day = "01";
-    this.preSelected.endDate.year = endYear.toString();
-    this.preSelected.endDate.month = endMonthString;
-    this.preSelected.endDate.day = "01";
+    this.preSelected.endDate.year = startYear.toString();
+    this.preSelected.endDate.month = startMonthString;
+    this.preSelected.endDate.day = (new Date(endYear, endMonth, 0));
+    this.preSelected.endDateForGraph.year = endYear.toString();
+    this.preSelected.endDateForGraph.month = endMonthString;
+    this.preSelected.endDateForGraph.day = "01";
   };
 
 
@@ -830,8 +832,8 @@ export class HomeComponent {
 
 
   getEndDate() {
-    if (this.filter.endDate != null) {
-      return this.filter.endDate.year + '-' + this.filter.endDate.month + '-' + (new Date(this.filter.endDate.year, this.filter.endDate.month, 0).getDate());
+    if (this.filter.endDateForGraph != null) {
+      return this.filter.endDateForGraph.year + '-' + this.filter.endDateForGraph.month + '-' + (new Date(this.filter.endDateForGraph.year, this.filter.endDateForGraph.month, 0).getDate());
     }
     return "";
   };
