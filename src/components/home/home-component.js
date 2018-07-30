@@ -531,59 +531,21 @@ export class HomeComponent {
       // Code finance ; ID Qualiac ; ID WINATEL ; Filiale ; Secteur ; DR
       var rowCells = allRows[singleRow].split(';');
 
-      // on crée les DR
-      if ((rowCells[5] && rowCells[5] !== "DR" )
-        && (rowCells[1] && rowCells[1] !== "#N/A" && rowCells[1] !== "NA")
-      ) {
-        var totorow5 = rowCells[5];
-        if (mySources[rowCells[5]] === undefined) {
-          mySources[rowCells[5]] = {
-            'id': rowCells[1],
-            'text': rowCells[3],
-            'state': {'selected': false}
-          };
+      if (rowCells[1] && rowCells[1] != "#N/A" && rowCells[1] != "NA" && rowCells[5] != "DR") {
+        if (mySources[rowCells[5]] == undefined) {
+          mySources[rowCells[5]] = {};
         }
-  /*      if (mySources[rowCells[5]][rowCells[4]] == undefined) {
-          mySources[rowCells[5]][rowCells[4]] = {
-            'id': rowCells[1],
-            'text': rowCells[3],
-            'state': {'selected': false}
-          };
+        if (mySources[rowCells[5]][rowCells[4]] == undefined) {
+          mySources[rowCells[5]][rowCells[4]] = [];
         }
-        mySources[rowCells[5]][rowCells[4][['children']]].push({
-          'id': rowCells[1],
-          'text': rowCells[3],
-          'state': {'selected': false}
-        });*/
+        mySources[rowCells[5]][rowCells[4]].push({
+          'IDQualiac': rowCells[1],
+          'filiale': rowCells[3]
+        });
       }
     }
+    ;
 
-    /*   if (rowCells[1] && rowCells[1] != "#N/A" && rowCells[1] != "NA" && rowCells[5] != "DR") {
-
-     var totorow5 = rowCells[5];
-     if (mySources[rowCells[5]] == undefined) {
-     mySources[rowCells[5]] = {
-     'id': rowCells[1],
-     'text': rowCells[3],
-     'state': {'selected': false}
-     };
-     }
-     if (mySources[rowCells[5]][rowCells[4]] == undefined) {
-     mySources[rowCells[5]][rowCells[4]] = {
-     'id': rowCells[1],
-     'text': rowCells[3],
-     'state': {'selected': false}
-     };
-     }
-     mySources[rowCells[5]][rowCells[4][['children']]].push({
-     'id': rowCells[1],
-     'text': rowCells[3],
-     'state': {'selected': false}
-     });
-     }
-     }
-     ;
-     */
     // Mise en forme des données
     var myData = [];
     var listDR = Object.keys(mySources);
@@ -595,13 +557,11 @@ export class HomeComponent {
         var actSecteur = actDR[listSecteur[secteur]];
         var childrenSecteur = [];
         for (var filiale = 0; filiale < actSecteur.length; filiale++) {
-
-          if (actSecteur[filiale]['IDQualiac'] != '170') {
+          if (actSecteur[filiale]['IDQualiac'] != '170')
             childrenSecteur.push({
               'text': actSecteur[filiale]['filiale'],
               'id': actSecteur[filiale]['IDQualiac']
             });
-          }
           else
             childrenSecteur.push({
               'text': actSecteur[filiale]['filiale'],
@@ -609,39 +569,32 @@ export class HomeComponent {
               'id': actSecteur[filiale]['IDQualiac']
             });
         }
-        debugger
-        var newSecteur = {
-          'id': listSecteur[secteur],
-          'text': listSecteur[secteur],
-          'children': childrenSecteur
-        };
+        var newSecteur = {'text': listSecteur[secteur], 'children': childrenSecteur};
         childrenDR.push(newSecteur);
       }
-      var newDR = {'id': listDR[DR], 'text': listDR[DR], 'children': childrenDR};
+      var newDR = {'text': listDR[DR], 'children': childrenDR};
       myData.push(newDR);
     }
     myData = {
-      id: '170',
-      text: 'Toutes les filiales',
-      state: {'opened': true, 'selected': false},
-      children: myData
+      'text': 'Toutes les filiales',
+      'state': {'opened': true, 'selected': false},
+      'children': myData
     };
     me.initMultiSelectTree(myData, me);
   };
 
 
   initMultiSelectTree(myData, me) {
-
     // Création modal filiale
     $('#multiselectTreeFiliale').jstree({
       'plugins': ['search', 'checkbox'],
       'core': {
         'data': myData,
-        'themes': {
-          'icons': false,
-          'dots': false
+        "themes": {
+          "icons": false,
+          "dots": false
         },
-        'expand_selected_onload': false
+        "expand_selected_onload": false
       },
       'search': {
         'show_only_matches': true,
@@ -654,36 +607,36 @@ export class HomeComponent {
     });
 
     $('#multiselectTreeFiliale').on('loaded.jstree', function () {
-      $("#multiselectTreeFiliale").jstree().select_node(['170', 'Grands Urbains'])
-      //$('#someTree').jstree('select_node', 'Grands Urbains');
+      $("#multiselectTreeFiliale").jstree().select_node([ '7804'])
+      //'170',
+      // $('#someTree').jstree('select_node', 'Grands Urbains');
     });
 
     $('#multiselectTreeFiliale').on('changed.jstree', function (e, data) {
       var objects = data.instance.get_selected(true);
 
-      /*  var find = false;
-       for (var obj = 0; obj < objects.length && !find; obj++) {
-       if (objects[obj]['text'] == "Toutes les filiales") {
-       find = true;
-       }
-       }
+      var find = false;
+      for (var obj = 0; obj < objects.length && !find; obj++) {
+        if (objects[obj]['text'] == "Toutes les filiales") {
+          find = true;
+        }
+      }
 
-       if (find) {
-       me.preSelectedFiliales = [];
-       } else {
-       var leaves = $.grep(objects, function (o) {
-       return data.instance.is_leaf(o)
-       });
+      if (find) {
+        me.preSelectedFiliales = [];
+      } else {
+        var leaves = $.grep(objects, function (o) {
+          return data.instance.is_leaf(o)
+        });
 
-       me.preSelectedFiliales = [];
-       for (var leave in leaves) {
-       me.setCurrentETS(leaves[leave]['id'], leaves[leave]['text']);
-       }
-       }  */
+        me.preSelectedFiliales = [];
+        for (var leave in leaves) {
+          me.setCurrentETS(leaves[leave]['id'], leaves[leave]['text']);
+        }
+      }
     });
     console.log.apply(console, me.logger.log(myData, "Multi select tree filiale initialized"));
-  };
-
+  }
 
   validateModal() {
     console.log.apply(console, this.logger.log(null, "Modal validated"));
