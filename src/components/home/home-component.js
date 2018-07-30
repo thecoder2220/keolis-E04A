@@ -92,7 +92,6 @@ export class HomeComponent {
   };
 
   loadUserProfile() {
-    debugger
     this.http.fetch('/v1/resources/login', {
       headers: {
         'Content-Type': 'application/json'
@@ -196,7 +195,7 @@ export class HomeComponent {
   resetDate() {
 
     // pour test => let now = new Date(2018, 0, 14);
-   let now = new Date();
+    let now = new Date();
     let startMonth = {};
     let endMonth = {};
     let endYear = {};
@@ -227,20 +226,16 @@ export class HomeComponent {
         }
       }
     }
-    if(startMonth === 11) {
-      console.log("if(startMonth === 11)")
+    if (startMonth === 11) {
       endMonth = 0;
-      endYear = startYear +1 ;
+      endYear = startYear + 1;
     } else {
-      console.log("if(startMonth !== 11)");
-      console.log("startMonth =", startMonth);
-      endMonth = startMonth +1;
-      console.log("endMonth =", endMonth)
-      endYear = startYear ;
+      endMonth = startMonth + 1;
+      endYear = startYear;
     }
 
-    let startMonthString = (startMonth+1) > 9 ? (startMonth+1).toString() : "0".concat(startMonth+1 );
-    let endMonthString = (endMonth+1) > 9 ? (endMonth+1).toString() : "0".concat(endMonth+1);
+    let startMonthString = (startMonth + 1) > 9 ? (startMonth + 1).toString() : "0".concat(startMonth + 1);
+    let endMonthString = (endMonth + 1) > 9 ? (endMonth + 1).toString() : "0".concat(endMonth + 1);
 
     this.preSelected.startDate.year = startYear.toString();
     this.preSelected.startDate.month = startMonthString;
@@ -536,21 +531,59 @@ export class HomeComponent {
       // Code finance ; ID Qualiac ; ID WINATEL ; Filiale ; Secteur ; DR
       var rowCells = allRows[singleRow].split(';');
 
-      if (rowCells[1] && rowCells[1] != "#N/A" && rowCells[1] != "NA" && rowCells[5] != "DR") {
-        if (mySources[rowCells[5]] == undefined) {
-          mySources[rowCells[5]] = {};
+      // on crée les DR
+      if ((rowCells[5] && rowCells[5] !== "DR" )
+        && (rowCells[1] && rowCells[1] !== "#N/A" && rowCells[1] !== "NA")
+      ) {
+        var totorow5 = rowCells[5];
+        if (mySources[rowCells[5]] === undefined) {
+          mySources[rowCells[5]] = {
+            'id': rowCells[1],
+            'text': rowCells[3],
+            'state': {'selected': false}
+          };
         }
-        if (mySources[rowCells[5]][rowCells[4]] == undefined) {
-          mySources[rowCells[5]][rowCells[4]] = [];
+  /*      if (mySources[rowCells[5]][rowCells[4]] == undefined) {
+          mySources[rowCells[5]][rowCells[4]] = {
+            'id': rowCells[1],
+            'text': rowCells[3],
+            'state': {'selected': false}
+          };
         }
-        mySources[rowCells[5]][rowCells[4]].push({
-          'IDQualiac': rowCells[1],
-          'filiale': rowCells[3]
-        });
+        mySources[rowCells[5]][rowCells[4][['children']]].push({
+          'id': rowCells[1],
+          'text': rowCells[3],
+          'state': {'selected': false}
+        });*/
       }
     }
-    ;
 
+    /*   if (rowCells[1] && rowCells[1] != "#N/A" && rowCells[1] != "NA" && rowCells[5] != "DR") {
+
+     var totorow5 = rowCells[5];
+     if (mySources[rowCells[5]] == undefined) {
+     mySources[rowCells[5]] = {
+     'id': rowCells[1],
+     'text': rowCells[3],
+     'state': {'selected': false}
+     };
+     }
+     if (mySources[rowCells[5]][rowCells[4]] == undefined) {
+     mySources[rowCells[5]][rowCells[4]] = {
+     'id': rowCells[1],
+     'text': rowCells[3],
+     'state': {'selected': false}
+     };
+     }
+     mySources[rowCells[5]][rowCells[4][['children']]].push({
+     'id': rowCells[1],
+     'text': rowCells[3],
+     'state': {'selected': false}
+     });
+     }
+     }
+     ;
+     */
     // Mise en forme des données
     var myData = [];
     var listDR = Object.keys(mySources);
@@ -628,25 +661,25 @@ export class HomeComponent {
     $('#multiselectTreeFiliale').on('changed.jstree', function (e, data) {
       var objects = data.instance.get_selected(true);
 
-      var find = false;
-      for (var obj = 0; obj < objects.length && !find; obj++) {
-        if (objects[obj]['text'] == "Toutes les filiales") {
-          find = true;
-        }
-      }
+      /*  var find = false;
+       for (var obj = 0; obj < objects.length && !find; obj++) {
+       if (objects[obj]['text'] == "Toutes les filiales") {
+       find = true;
+       }
+       }
 
-      if (find) {
-        me.preSelectedFiliales = [];
-      } else {
-        var leaves = $.grep(objects, function (o) {
-          return data.instance.is_leaf(o)
-        });
+       if (find) {
+       me.preSelectedFiliales = [];
+       } else {
+       var leaves = $.grep(objects, function (o) {
+       return data.instance.is_leaf(o)
+       });
 
-        me.preSelectedFiliales = [];
-        for (var leave in leaves) {
-          me.setCurrentETS(leaves[leave]['id'], leaves[leave]['text']);
-        }
-      }
+       me.preSelectedFiliales = [];
+       for (var leave in leaves) {
+       me.setCurrentETS(leaves[leave]['id'], leaves[leave]['text']);
+       }
+       }  */
     });
     console.log.apply(console, me.logger.log(myData, "Multi select tree filiale initialized"));
   };
