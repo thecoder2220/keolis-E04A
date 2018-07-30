@@ -16,7 +16,7 @@ small{
 }
 
 .jumbotron{
-	border-radius : 0
+	border-radius : 0;
 }
 
 .card-text {
@@ -216,6 +216,7 @@ a.table-sort{
 
 @media (min-width: 576px){
 	.jumbotron {
-		padding: 2rem 1rem;
+		padding: 1rem 0rem;
+    margin-top: 1rem;
 	}
 }

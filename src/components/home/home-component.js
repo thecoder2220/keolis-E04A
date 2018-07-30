@@ -58,6 +58,7 @@ export class HomeComponent {
 
   @bindable state = 0;
   achatsStatsForExport = [];
+  @bindable totalMagCredible = 0;
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -79,14 +80,11 @@ export class HomeComponent {
     this.http = http;
     //this.echarts = Echarts;
     this.ea = EventAggregator;
-
     this.years = [];
     for (var i = (new Date()).getFullYear(); i > 1999; i--) {
       this.years.push(i.toString());
     }
-
     this.loadUserProfile();
-
     this.resetDate();
     this.filter = this.preSelected;
   };
@@ -107,18 +105,15 @@ export class HomeComponent {
     })
   };
 
-
   isActive(viewName, currentView) {
     if (this.currentView == viewName) return "danger";
     else return "secondary"
   };
 
-
   setCurrentView(viewName) {
     console.log.apply(console, this.logger.log(null, "Change view :", viewName));
     this.currentPage = 1;
     this.sendTracking(viewName)
-
     if (viewName == "Agrégée") {
       if (this.currentView == "Pièce") {
         this.setCurrentPart(null, null)
@@ -264,22 +259,15 @@ export class HomeComponent {
 
 
   loadAchatsStats() {
-
     this.achatsStats = [];
     this.achatsStatsReady = false;
+    this.totalMagCredible=0;
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
-    /* const totot ='/v1/resources/achatsStats2?rs:default=' + part + ets
-     + '&rs:currentPage=' + this.currentPage
-     + "&rs:pageSize=" + this.config.pageSize
-     + "&rs:startDate=" + startDate
-     + "&rs:endDate=" + endDate
-     + "&rs:sort=" + this.sortField
-     + "&rs:minQuantity=" + this.filter.minQuantity*/
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -296,6 +284,8 @@ export class HomeComponent {
       console.log.apply(console, this.logger.log(data, "Data achats loaded"));
       this.currentUser = data.currentUser;
       this.achatsStats = data.results;
+      const firstAchatStats =this.achatsStats[0];
+      this.totalMagCredible=firstAchatStats && firstAchatStats.MAGPMC && firstAchatStats.MAGPMCCUMUL ?(firstAchatStats.MAGPMC/firstAchatStats.MAGPMCCUMUL):0;
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
@@ -594,7 +584,6 @@ export class HomeComponent {
     if (preSelectedEts.length == 0) {
       preSelectedEts=['170'];  // Toutes les filiales
     }
-    debugger
     // Création modal filiale
     $('#multiselectTreeFiliale').jstree({
       'plugins': ['search', 'checkbox'],
@@ -617,10 +606,7 @@ export class HomeComponent {
     });
 
     $('#multiselectTreeFiliale').on('loaded.jstree', function () {
-      debugger
       $("#multiselectTreeFiliale").jstree().select_node(preSelectedEts)
-      //'170',
-      // $('#someTree').jstree('select_node', 'Grands Urbains');
     });
 
     $('#multiselectTreeFiliale').on('changed.jstree', function (e, data) {
@@ -706,11 +692,6 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDate();
     const endDate = this.getEndDate();
-    let toto = '/v1/resources/ecartAchatMoyen?rs:part=' + ets
-      + '&rs:currentPage=' + this.currentPage
-      + "&rs:pageSize=" + this.config.pageSize
-      + "&rs:startDate=" + startDate
-      + "&rs:endDate=" + endDate
     this.http.fetch('/v1/resources/ecartAchatMoyen?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -723,12 +704,9 @@ export class HomeComponent {
         method: 'get'
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data ecart moyen loaded"));
-      debugger
       this.ecartMoyen = data.ratio;
-
     })
   };
-
 
   processSumGAP() {
     var totalMAGPMC = 0;
