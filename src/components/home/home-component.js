@@ -576,6 +576,7 @@ export class HomeComponent {
       myData.push(newDR);
     }
     myData = {
+      'id':'170',
       'text': 'Toutes les filiales',
       'state': {'opened': true, 'selected': false},
       'children': myData
@@ -585,6 +586,15 @@ export class HomeComponent {
 
 
   initMultiSelectTree(myData, me) {
+
+    var preSelectedEts =[] ;
+    this.preSelected.ets.map( (item) => {
+      preSelectedEts.push(item.id);  // 7804 normalement pour versailles
+    })
+    if (preSelectedEts.length == 0) {
+      preSelectedEts=['170'];  // Toutes les filiales
+    }
+    debugger
     // Création modal filiale
     $('#multiselectTreeFiliale').jstree({
       'plugins': ['search', 'checkbox'],
@@ -607,7 +617,8 @@ export class HomeComponent {
     });
 
     $('#multiselectTreeFiliale').on('loaded.jstree', function () {
-      $("#multiselectTreeFiliale").jstree().select_node([ '7804'])
+      debugger
+      $("#multiselectTreeFiliale").jstree().select_node(preSelectedEts)
       //'170',
       // $('#someTree').jstree('select_node', 'Grands Urbains');
     });
@@ -712,6 +723,7 @@ export class HomeComponent {
         method: 'get'
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data ecart moyen loaded"));
+      debugger
       this.ecartMoyen = data.ratio;
 
     })
@@ -746,7 +758,6 @@ export class HomeComponent {
 
     this.diagramIsReady = false;
     $("div#mainDiagram1").addClass('hidden');
-    debugger
     this.http.fetch('/v1/resources/yearStats?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
