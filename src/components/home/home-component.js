@@ -262,6 +262,7 @@ export class HomeComponent {
     this.achatsStats = [];
     this.achatsStatsReady = false;
     this.totalMagCredible=0;
+    this.config.totalItems =0;
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
