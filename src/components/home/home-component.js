@@ -10,6 +10,12 @@ import 'jstree';
 import numeral from 'numeral';
 import {downloadFile} from '../../utils'
 
+Date.prototype.addDays = function(days) {
+  var date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
 @inject(HttpClient, Echarts, EventAggregator)
 export class HomeComponent {
   views = ['Agrégée', 'Pièce', 'Qualité'];
@@ -149,12 +155,12 @@ export class HomeComponent {
   };
 
 
+  // clic sur le bouton appliquer
   refresh() {
     //if (this.currentView == "Agrégée" || this.currentView == "Qualité") {
     if (this.currentView == "Pièce") {
       this.ea.publish('partChanged', {message: 'Part selection changed'});
     }
-    this.achatsStats.slice(0);
     this.loadAchatsStats();
     this.loadEcartMoyen();
     this.loadYearStats();
@@ -266,8 +272,8 @@ export class HomeComponent {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
-    const startDate = this.getStartDate();
-    const endDate = this.getEndDate();
+    const startDate = this.getStartDateFromFilter();
+    const endDate = this.getEndDateFromFilter();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
@@ -304,6 +310,7 @@ export class HomeComponent {
 
   loadQualityStats() {
     this.achatsQualiteStats = [];
+    this.achatsQualiteStatsReady = false;
     let parts = {
       parts: this.achatsStats.map(function (item) {
         return item["main.LignesCommande.RefFabricant"]
@@ -312,10 +319,9 @@ export class HomeComponent {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
-    const startDate = this.getStartDate();
-    const endDate = this.getEndDate();
-    this.achatsQualiteStatsReady = false;
-
+    const startDate = this.getStartDateFromFilter();
+    const endDate = this.getEndDateFromFilter();
+    debugger
     this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -333,7 +339,6 @@ export class HomeComponent {
       for (var achat of this.achatsStats) {
         achat.showQuality = this.showQualityLine(achat);
       }
-      this.config.totalItems = data.totalItems;
       this.achatsQualiteStatsReady = true;
     })
   };
@@ -692,8 +697,8 @@ export class HomeComponent {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
-    const startDate = this.getStartDate();
-    const endDate = this.getEndDate();
+    const startDate = this.getStartDateFromFilter();
+    const endDate = this.getEndDateFromFilter();
     this.http.fetch('/v1/resources/ecartAchatMoyen?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -732,8 +737,8 @@ export class HomeComponent {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
-    const startDate = this.getStartDate();
-    const endDate = this.getEndDate();
+    const startDate = this.getStartDateFromFilter();
+    const endDate = this.getEndDateFromFilterForGraph();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
 
     this.diagramIsReady = false;
@@ -800,7 +805,7 @@ export class HomeComponent {
   };
 
 
-  getStartDate() {
+  getStartDateFromFilter() {
     if (this.filter.startDate != null) {
       return this.filter.startDate.year + '-' + this.filter.startDate.month + '-01';
     }
@@ -808,13 +813,21 @@ export class HomeComponent {
   };
 
 
-  getEndDate() {
-    if (this.filter.endDateForGraph != null) {
-      return this.filter.endDateForGraph.year + '-' + this.filter.endDateForGraph.month + '-' + (new Date(this.filter.endDateForGraph.year, this.filter.endDateForGraph.month, 0).getDate());
+  getEndDateFromFilter() {
+    if (this.filter.endDate != null) {
+      return this.filter.endDate.year + '-' + this.filter.endDate.month + '-' +(new Date(this.filter.endDate.year, this.filter.endDate.month, 0).getDate());
     }
     return "";
   };
 
+  getEndDateFromFilterForGraph() {
+    if (this.filter.endDate != null) {
+      const lastDayOfFilterDate = new Date(this.filter.endDate.year, this.filter.endDate.month, 0);
+      return lastDayOfFilterDate.addDays(1);
+    }
+    else
+     return "";
+  };
 
   getSpacedNumber(nombre) {
     var nbrWithSpaces = nombre.toString().replace(/(\d)(?=(\d{3})+\b)/g, '$1 ');
@@ -853,8 +866,8 @@ export class HomeComponent {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
-    const startDate = this.getStartDate();
-    const endDate = this.getEndDate();
+    const startDate = this.getStartDateFromFilter();
+    const endDate = this.getEndDateFromFilter();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     var dataToStore = {};
     dataToStore.data = [];
@@ -910,7 +923,7 @@ export class HomeComponent {
 
       })
     } else if (this.currentView === 'Qualité') {
-
+      debugger
       let parts = {
         parts: this.achatsStats.map(function (item) {
           return item["main.LignesCommande.RefFabricant"]
@@ -918,7 +931,7 @@ export class HomeComponent {
       };
 
       var achatsStatsForExportCsvFromQualiteView = [];
-      var qualiteStatsForExportCsvFromQualiteView = [];
+      var qualiteStats = [];
       this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
         + '&rs:currentPage=' + 1
         + "&rs:pageSize=" + 100
@@ -933,51 +946,57 @@ export class HomeComponent {
           method: 'get'
         }).then(response => response.json()).then(data => {// ok
         achatsStatsForExportCsvFromQualiteView = data.results;
-        this.loadPartsNames(this.achatsStatsForExport, "main.LignesCommande.RefFabricant").then(labels => {
+        this.loadPartsNames(achatsStatsForExportCsvFromQualiteView, "main.LignesCommande.RefFabricant").then(labels => {
           this.partNames = labels;
-          let achats = this.achatsStatsForExport;
+          let achats = achatsStatsForExportCsvFromQualiteView;
           if (achats == null || !achats.length) {
             return;
           }
-          for (let achat in achats) {
-            let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
-            let label = this.partNames[refFabricant];
-            if ((label !== undefined) && (label !== null)) {
-              var storeData = {};
-              storeData['Réf. Fabricant'] = refFabricant;
-              storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-              storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
-              storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
-              storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
-              storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-            }
-            this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
-              + '&rs:currentPage=' + 1
-              + "&rs:pageSize=" + 100
-              + "&rs:startDate=" + startDate
-              + "&rs:endDate=" + endDate
-              , {
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                method: 'post'
-                ,
-                body: json(parts)
-              }).then(response => response.json()).then(data => {
-              console.log.apply(console, this.logger.log(data, "Data quality loaded for export csv"));
-              var qualiteStatsForExportCsvFromQualiteView = data;
-              if (!qualiteStatsForExportCsvFromQualiteView) {
+
+          this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
+            + '&rs:currentPage=' + 1
+            + "&rs:pageSize=" + 100
+            + "&rs:startDate=" + startDate
+            + "&rs:endDate=" + endDate
+            , {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              method: 'post'
+              ,
+              body: json(parts)
+            }).then(qualityResponse => qualityResponse.json()).then(qualityData => {
+              qualiteStats = qualityData;
+              if (!qualiteStats) {
                 return;
               }
-              for (let qualite in qualiteStatsForExportCsvFromQualiteView) {
-                let refFabricant = qualite;
-                let refArticle = Object.keys(qualiteStatsForExportCsvFromQualiteView[qualite])[0];
+
+              for (let achat in achats) {
+                let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
                 let label = this.partNames[refFabricant];
                 if ((label !== undefined) && (label !== null)) {
+                  var storeData = {};
+                  storeData['Réf. Fabricant'] = refFabricant;
+                  storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+                  storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
+                  storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+                  storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+                  storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
+                }
+                let refArticle = achats[achat]['main.LignesCommande.Article'];
+                let qualiteForExport = qualiteStats[refFabricant][refArticle];
+                if (qualiteForExport) {
+                  let ori = qualiteForExport['ORI'];
 
-                  let qualitiesForExport = qualiteStatsForExportCsvFromQualiteView[refFabricant][refArticle];
-                  let ori = qualitiesForExport['ORI'];
-                  let ori2 = qualitiesForExport.ORI;
+
+                  storeData['ORI / Quantité commandée'] = ori?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
+                /*
+                  version html
+                  ${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORI"]["SomQuantiteFacturee"]
+                  /achat["SomQuantiteFacturee"] | numberFormat:'(0.0 %)'}
+
+
+
 
                   //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
 
@@ -993,14 +1012,16 @@ export class HomeComponent {
                   storeData['PQE / Quantité commandée'] = '';
                   //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
                   storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
-                  dataToStore.data.push(storeData);
+                 */
+
                 }
-              }
+              } // boucle for achats
               downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
-            })
-          }
+             })
+
+           })
         })
-      })
-    } // } else if (this.currentView === 'Qualité') {
+      } // } else if (this.currentView === 'Qualité') {
+
   } // fin exportDatatable
 }  // fin class
