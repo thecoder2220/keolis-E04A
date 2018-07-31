@@ -65,6 +65,11 @@ export class HomeComponent {
   @bindable state = 0;
   achatsStatsForExport = [];
   @bindable totalMagCredible = '0';
+  @bindable sumTotalExpenditure = 0;
+/*    @bindable totalMagCredible =
+  @bindable totalMagCredible =
+  @bindable totalMagCredible =
+  @bindable totalMagCredible =*/
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -269,6 +274,7 @@ export class HomeComponent {
     this.achatsStatsReady = false;
     this.totalMagCredible = '0';
     this.config.totalItems = 0;
+    this.sumTotalExpenditure = 0;
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
@@ -292,6 +298,8 @@ export class HomeComponent {
       this.currentUser = data.currentUser;
       this.achatsStats = data.results;
       const firstAchatStats = this.achatsStats[0];
+      this.achatsStats.map(item => this.sumTotalExpenditure +=item.SomMontantCalc );
+      this.sumTotalExpenditure = numeral(this.sumTotalExpenditure).format('0,0').replace(/,/g, ' ')
       const totalMagCredibleNumberFormat = firstAchatStats && firstAchatStats.MAGPMC && firstAchatStats.MAGPMCCUMUL ? (firstAchatStats.MAGPMC / firstAchatStats.MAGPMCCUMUL) : 0;
       this.totalMagCredible = numeral(totalMagCredibleNumberFormat).format('0,0').replace(/,/g, ' ')
       this.config.totalItems = data.totalItems;

@@ -182,7 +182,7 @@
 
         <div>
 
-          <div style="font-size: 90%; width: 100%" >
+          <td style="font-size: 90%; width: 100%" >
             <table class="table table-hover">
               <thead class="thead-dark">
               <tr>
@@ -448,6 +448,15 @@
                   | numberFormat:'(0.0)'}
                 </th>
 
+              </tr>
+              <tr>
+                <td/>
+                <td/>
+                <td/>
+                <td/>
+                <th scope="col"><label if.bind="currentView=='Agrégée'">${sumTotalExpenditure} &euro;</label></th>
+                <th scope="col"><label  if.bind="currentView=='Qualité'" > La somme Qualité  ${currentView}</label></th>
+                </td>
               </tr>
               </tbody>
             </table>

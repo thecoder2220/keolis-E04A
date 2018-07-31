@@ -66,3 +66,5 @@ export const formatDate =  (date) => {
 
   return [year, month, day].join('-');
 }
+
+//export const adding=(a, b) => { return a + b; }
