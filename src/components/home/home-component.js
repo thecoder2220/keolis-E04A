@@ -10,7 +10,7 @@ import 'jstree';
 import numeral from 'numeral';
 import {downloadFile, formatDate} from '../../utils'
 
-Date.prototype.addDays = function(days) {
+Date.prototype.addDays = function (days) {
   var date = new Date(this.valueOf());
   date.setDate(date.getDate() + days);
   return date;
@@ -293,7 +293,7 @@ export class HomeComponent {
       this.achatsStats = data.results;
       const firstAchatStats = this.achatsStats[0];
       const totalMagCredibleNumberFormat = firstAchatStats && firstAchatStats.MAGPMC && firstAchatStats.MAGPMCCUMUL ? (firstAchatStats.MAGPMC / firstAchatStats.MAGPMCCUMUL) : 0;
-      this.totalMagCredible = numeral(totalMagCredibleNumberFormat).format('0,0').replace(/,/g,' ')
+      this.totalMagCredible = numeral(totalMagCredibleNumberFormat).format('0,0').replace(/,/g, ' ')
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
@@ -321,7 +321,6 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDateFromFilter();
     const endDate = this.getEndDateFromFilter();
-    debugger
     this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -815,7 +814,7 @@ export class HomeComponent {
 
   getEndDateFromFilter() {
     if (this.filter.endDate != null) {
-      return this.filter.endDate.year + '-' + this.filter.endDate.month + '-' +(new Date(this.filter.endDate.year, this.filter.endDate.month, 0).getDate());
+      return this.filter.endDate.year + '-' + this.filter.endDate.month + '-' + (new Date(this.filter.endDate.year, this.filter.endDate.month, 0).getDate());
     }
     return "";
   };
@@ -825,9 +824,9 @@ export class HomeComponent {
       const lastDayOfFilterDate = new Date(this.filter.endDate.year, this.filter.endDate.month, 0);
       const nextDay = lastDayOfFilterDate.addDays(1);
       return formatDate(nextDay);
-      }
+    }
     else
-     return "";
+      return "";
   };
 
   getSpacedNumber(nombre) {
@@ -967,62 +966,64 @@ export class HomeComponent {
               ,
               body: json(parts)
             }).then(qualityResponse => qualityResponse.json()).then(qualityData => {
-              qualiteStats = qualityData;
-              if (!qualiteStats) {
-                return;
-              }
+            qualiteStats = qualityData;
+            if (!qualiteStats) {
+              return;
+            }
 
-              for (let achat in achats) {
-                let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
-                let label = this.partNames[refFabricant];
-                if ((label !== undefined) && (label !== null)) {
-                  var storeData = {};
-                  storeData['Réf. Fabricant'] = refFabricant;
-                  storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
-                  storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
-                  storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
-                  storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
-                  storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
-                }
-                let refArticle = achats[achat]['main.LignesCommande.Article'];
+            for (let achat in achats) {
+              let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
+              let refArticle = achats[achat]['main.LignesCommande.Article'];
+              if (qualiteStats[refFabricant]) {
                 let qualiteForExport = qualiteStats[refFabricant][refArticle];
+
                 if (qualiteForExport) {
-                  let ori = qualiteForExport['ORI'];
+                  let label = this.partNames[refFabricant];
 
+                  if (label) {
+                    var storeData = {};
+                    storeData['Réf. Fabricant'] = refFabricant;
+                    storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
+                    storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
+                    storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+                    storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+                    storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
 
-                  storeData['ORI / Quantité commandée'] = ori?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-                /*
-                  version html
-                  ${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORI"]["SomQuantiteFacturee"]
-                  /achat["SomQuantiteFacturee"] | numberFormat:'(0.0 %)'}
-
-
-
-
-                  //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
-
-                  storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
-                  //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-                  storeData['ORI / Prix d\'achat moyen'] = ori !== undefined || ori !== null ? numeral(ori['AvgPrixTarif']).format('0.0') : '';
-                  let orf = qualitiesForExport['ORF'];
-                  storeData['ORF / Quantité commandée'] = '';
-                  //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-                  storeData['ORF / Prix d\'achat moyen'] = orf !== undefined || orf !== null ? numeral(orf['AvgPrixTarif']).format('0.0') : '';
-                  //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
-                  let pqe = qualitiesForExport['PQE'];
-                  storeData['PQE / Quantité commandée'] = '';
-                  //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
-                  storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
-                 */
-
+                    let ori = qualiteForExport['ORI'];
+                    storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+                    dataToStore.data.push(storeData);
+                  }
                 }
-              } // boucle for achats
-              downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
-             })
+              }
+              /*
+               version html
+               ${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORI"]["SomQuantiteFacturee"]
+               /achat["SomQuantiteFacturee"] | numberFormat:'(0.0 %)'}
 
-           })
+               //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
+
+               storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+               //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
+               storeData['ORI / Prix d\'achat moyen'] = ori !== undefined || ori !== null ? numeral(ori['AvgPrixTarif']).format('0.0') : '';
+               let orf = qualitiesForExport['ORF'];
+               storeData['ORF / Quantité commandée'] = '';
+               //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+               storeData['ORF / Prix d\'achat moyen'] = orf !== undefined || orf !== null ? numeral(orf['AvgPrixTarif']).format('0.0') : '';
+               //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
+               let pqe = qualitiesForExport['PQE'];
+               storeData['PQE / Quantité commandée'] = '';
+               //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+               storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
+               */
+
+
+            } // boucle for achats
+            downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
+          })
+
         })
-      } // } else if (this.currentView === 'Qualité') {
+      })
+    } // } else if (this.currentView === 'Qualité') {
 
   } // fin exportDatatable
 }  // fin class

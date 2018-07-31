@@ -183,12 +183,12 @@
 
         <div>
 
-          <div style="font-size: 90%; width: 100%">
+          <div style="font-size: 90%; width: 100%" >
             <table class="table table-hover">
               <thead class="thead-dark">
               <tr>
-                <th colspan="6" style="background-color: transparent; border:0px; padding:0px">
-                  <div show.bind="filter.part==null">
+                <th colspan="6"  style="background-color: transparent; border:0px; padding:0px">
+                  <div show.bind="filter.part==null" if.bind="currentView!='Qualité'">
                     <nav aria-label="Page navigation example">
                       <ul class="pagination" style="margin-bottom:0px"
                           if.bind="config.totalItems>0">
