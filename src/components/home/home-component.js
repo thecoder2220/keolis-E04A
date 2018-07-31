@@ -337,7 +337,7 @@ export class HomeComponent {
       debugger
       this.achatsQualiteStats = data;
       for (var achat of this.achatsStats) {
-        achat.showQuality = this.showQualityLine(achat);
+        achat.showQuality = this.showQualityLine(achat, this.achatsQualiteStats);
       }
       this.achatsQualiteStatsReady = true;
     })
@@ -351,10 +351,10 @@ export class HomeComponent {
   };
 
 
-  showQualityLine(achat) {
-    if (achat != null && this.achatsQualiteStats != null) {
+  showQualityLine(achat, achatsQualiteStats) {
+    if (achat != null && achatsQualiteStats != null) {
       var moreThanTwenty = 0;
-      var qualities = this.achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]];
+      var qualities = achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]];
       if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
       if (qualities["ORF"] != null && qualities["ORF"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
       if (qualities["PQE"] != null && qualities["PQE"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
@@ -932,7 +932,7 @@ export class HomeComponent {
       };
 
       var achatsStatsForExportCsvFromQualiteView = [];
-      this.achatsQualiteStats= [];
+      var qualiteStats= [];
       this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
         + '&rs:currentPage=' + 1
         + "&rs:pageSize=" + 100
@@ -967,8 +967,8 @@ export class HomeComponent {
               ,
               body: json(parts)
             }).then(qualityResponse => qualityResponse.json()).then(qualityData => {
-            this.achatsQualiteStats=qualityData;
-            if (!this.achatsQualiteStats) {
+            qualiteStats=qualityData;
+            if (!qualiteStats) {
               return;
             }
 
@@ -976,8 +976,8 @@ export class HomeComponent {
 
               let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
               let refArticle = achats[achat]['main.LignesCommande.Article'];
-              if (this.achatsQualiteStats[refFabricant] && this.showQualityLine(achats[achat])) {
-                let qualiteForExport = this.achatsQualiteStats[refFabricant][refArticle];
+              if (qualiteStats[refFabricant] && this.showQualityLine(achats[achat], qualiteStats)) {
+                let qualiteForExport = qualiteStats[refFabricant][refArticle];
 
                 if (qualiteForExport) {
                   let label = this.partNames[refFabricant];
@@ -992,34 +992,19 @@ export class HomeComponent {
                     storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
 
                     let ori = qualiteForExport['ORI'];
-                    storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+                    storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '0.0 %';
+                    storeData['ORI / Prix d\'achat moyen'] = ori ? numeral(ori['AvgPrixTarif']).format('0.0') : '0.0';
+                    let orf = qualiteForExport['ORF'];
+                    storeData['ORF / Quantité commandée'] = orf ? numeral(orf['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'): '0.0 %';
+                    storeData['ORF / Prix d\'achat moyen'] = orf ? numeral(orf['AvgPrixTarif']).format('0.0') : '0.0';
+                    let pqe = qualiteForExport['PQE'];
+                    storeData['PQE / Quantité commandée'] = pqe ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '0.0 %';
+                    storeData['PQE / Prix d\'achat moyen'] = pqe ? numeral(pqe['AvgPrixTarif']).format('0.0') : '0.0';
                     dataToStore.data.push(storeData);
                   }
                 }
               }
-              /*
-               version html
-               ${achatsQualiteStats[achat["main.LignesCommande.RefFabricant"]][achat["main.LignesCommande.Article"]]["ORI"]["SomQuantiteFacturee"]
-               /achat["SomQuantiteFacturee"] | numberFormat:'(0.0 %)'}
-
-               //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
-
-               storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
-               //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-               storeData['ORI / Prix d\'achat moyen'] = ori !== undefined || ori !== null ? numeral(ori['AvgPrixTarif']).format('0.0') : '';
-               let orf = qualitiesForExport['ORF'];
-               storeData['ORF / Quantité commandée'] = '';
-               //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-               storeData['ORF / Prix d\'achat moyen'] = orf !== undefined || orf !== null ? numeral(orf['AvgPrixTarif']).format('0.0') : '';
-               //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
-               let pqe = qualitiesForExport['PQE'];
-               storeData['PQE / Quantité commandée'] = '';
-               //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
-               storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
-               */
-
-
-            } // boucle for achats
+             } // boucle for achats
             downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
           })
 
