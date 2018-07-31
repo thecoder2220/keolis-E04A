@@ -8,7 +8,7 @@ import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jstree';
 import numeral from 'numeral';
-import {downloadFile} from '../../utils'
+import {downloadFile, formatDate} from '../../utils'
 
 Date.prototype.addDays = function(days) {
   var date = new Date(this.valueOf());
@@ -823,8 +823,9 @@ export class HomeComponent {
   getEndDateFromFilterForGraph() {
     if (this.filter.endDate != null) {
       const lastDayOfFilterDate = new Date(this.filter.endDate.year, this.filter.endDate.month, 0);
-      return lastDayOfFilterDate.addDays(1);
-    }
+      const nextDay = lastDayOfFilterDate.addDays(1);
+      return formatDate(nextDay);
+      }
     else
      return "";
   };
