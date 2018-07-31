@@ -334,6 +334,7 @@ export class HomeComponent {
         body: json(parts)
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data quality loaded"));
+      debugger
       this.achatsQualiteStats = data;
       for (var achat of this.achatsStats) {
         achat.showQuality = this.showQualityLine(achat);
@@ -931,7 +932,7 @@ export class HomeComponent {
       };
 
       var achatsStatsForExportCsvFromQualiteView = [];
-      var qualiteStats = [];
+      this.achatsQualiteStats= [];
       this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
         + '&rs:currentPage=' + 1
         + "&rs:pageSize=" + 100
@@ -966,16 +967,17 @@ export class HomeComponent {
               ,
               body: json(parts)
             }).then(qualityResponse => qualityResponse.json()).then(qualityData => {
-            qualiteStats = qualityData;
-            if (!qualiteStats) {
+            this.achatsQualiteStats=qualityData;
+            if (!this.achatsQualiteStats) {
               return;
             }
 
             for (let achat in achats) {
+
               let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
               let refArticle = achats[achat]['main.LignesCommande.Article'];
-              if (qualiteStats[refFabricant]) {
-                let qualiteForExport = qualiteStats[refFabricant][refArticle];
+              if (this.achatsQualiteStats[refFabricant] && this.showQualityLine(achats[achat])) {
+                let qualiteForExport = this.achatsQualiteStats[refFabricant][refArticle];
 
                 if (qualiteForExport) {
                   let label = this.partNames[refFabricant];
