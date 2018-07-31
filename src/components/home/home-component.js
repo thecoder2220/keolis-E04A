@@ -58,7 +58,7 @@ export class HomeComponent {
 
   @bindable state = 0;
   achatsStatsForExport = [];
-  @bindable totalMagCredible = 0;
+  @bindable totalMagCredible = '0';
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -261,8 +261,8 @@ export class HomeComponent {
   loadAchatsStats() {
     this.achatsStats = [];
     this.achatsStatsReady = false;
-    this.totalMagCredible=0;
-    this.config.totalItems =0;
+    this.totalMagCredible = '0';
+    this.config.totalItems = 0;
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
@@ -285,8 +285,9 @@ export class HomeComponent {
       console.log.apply(console, this.logger.log(data, "Data achats loaded"));
       this.currentUser = data.currentUser;
       this.achatsStats = data.results;
-      const firstAchatStats =this.achatsStats[0];
-      this.totalMagCredible=firstAchatStats && firstAchatStats.MAGPMC && firstAchatStats.MAGPMCCUMUL ?(firstAchatStats.MAGPMC/firstAchatStats.MAGPMCCUMUL):0;
+      const firstAchatStats = this.achatsStats[0];
+      const totalMagCredibleNumberFormat = firstAchatStats && firstAchatStats.MAGPMC && firstAchatStats.MAGPMCCUMUL ? (firstAchatStats.MAGPMC / firstAchatStats.MAGPMCCUMUL) : 0;
+      this.totalMagCredible = numeral(totalMagCredibleNumberFormat).format('0,0').replace(/,/g,' ')
       this.config.totalItems = data.totalItems;
       this.lastPageNumber = Math.ceil(data.totalItems / this.config.pageSize);
       //this.processSumGAP()
@@ -567,7 +568,7 @@ export class HomeComponent {
       myData.push(newDR);
     }
     myData = {
-      'id':'170',
+      'id': '170',
       'text': 'Toutes les filiales',
       'state': {'opened': true, 'selected': false},
       'children': myData
@@ -578,12 +579,12 @@ export class HomeComponent {
 
   initMultiSelectTree(myData, me) {
 
-    var preSelectedEts =[] ;
-    this.preSelected.ets.map( (item) => {
+    var preSelectedEts = [];
+    this.preSelected.ets.map((item) => {
       preSelectedEts.push(item.id);  // 7804 normalement pour versailles
     })
     if (preSelectedEts.length == 0) {
-      preSelectedEts=['170'];  // Toutes les filiales
+      preSelectedEts = ['170'];  // Toutes les filiales
     }
     // Création modal filiale
     $('#multiselectTreeFiliale').jstree({
@@ -915,65 +916,91 @@ export class HomeComponent {
           return item["main.LignesCommande.RefFabricant"]
         })
       };
-      this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
+
+      var achatsStatsForExportCsvFromQualiteView = [];
+      var qualiteStatsForExportCsvFromQualiteView = [];
+      this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
         + '&rs:currentPage=' + 1
         + "&rs:pageSize=" + 100
         + "&rs:startDate=" + startDate
         + "&rs:endDate=" + endDate
+        + "&rs:sort=" + this.sortField
+        + "&rs:minQuantity=" + this.filter.minQuantity
         , {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json;charset=utf-8'
           },
-          method: 'post'
-          ,
-          body: json(parts)
-        }).then(response => response.json()).then(data => {
-        console.log.apply(console, this.logger.log(data, "Data quality loaded for export csv"));
-        var achats = data;
-        if (achats === null || achats === undefined) {
-          //if (achats == null || !achats.length) {
-          return;
-        }
-        this.loadPartsNamesWithDirectReference(achats).then(labels => {
+          method: 'get'
+        }).then(response => response.json()).then(data => {// ok
+        achatsStatsForExportCsvFromQualiteView = data.results;
+        this.loadPartsNames(this.achatsStatsForExport, "main.LignesCommande.RefFabricant").then(labels => {
           this.partNames = labels;
+          let achats = this.achatsStatsForExport;
+          if (achats == null || !achats.length) {
+            return;
+          }
           for (let achat in achats) {
-            let refFabricant = achat;
-            let refArticle = Object.keys(achats[achat])[0];
-            ;
+            let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
             let label = this.partNames[refFabricant];
             if ((label !== undefined) && (label !== null)) {
-              let storeData = {};
+              var storeData = {};
               storeData['Réf. Fabricant'] = refFabricant;
-              storeData['Réf. Kapp'] = refArticle;
+              storeData['Réf. Kapp'] = achats[achat]['main.LignesCommande.Article'];
               storeData['Libellé'] = label.substring(0, 15).replace(new RegExp('\"', 'g'), '');
-              storeData['Quantité achetée'] = ''; //refArticle['SomQuantiteFacturee'];
-              storeData['Prix d\'achat moyen'] = '';//numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
-              storeData['Dépenses totales'] = ''; //numeral(achats[achat]['SomMontantCalc']).format('(0)');
-              let qualitiesForExport = achats[refFabricant][refArticle];
-              let ori = qualitiesForExport['ORI'];
-              //let ori2 = qualitiesForExport.ORI;
-
-              //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
-
-              storeData['ORI / Quantité commandée'] = '';
-              //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
-              storeData['ORI / Prix d\'achat moyen'] = ori !== undefined || ori !== null ? numeral(ori['AvgPrixTarif']).format('0.0') : '';
-              let orf = qualitiesForExport['ORF'];
-              storeData['ORF / Quantité commandée'] = '';
-              //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
-              storeData['ORF / Prix d\'achat moyen'] = orf !== undefined || orf !== null ? numeral(orf['AvgPrixTarif']).format('0.0') : '';
-              //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
-              let pqe = qualitiesForExport['PQE'];
-              storeData['PQE / Quantité commandée'] = '';
-              //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
-              storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
-              dataToStore.data.push(storeData);
+              storeData['Quantité achetée'] = achats[achat]['SomQuantiteFacturee'];
+              storeData['Prix d\'achat moyen'] = numeral(achats[achat]['SomMontantCalc'] / achats[achat]['SomQuantiteFacturee']).format('0.00');
+              storeData['Dépenses totales'] = numeral(achats[achat]['SomMontantCalc']).format('(0)');
             }
+            this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
+              + '&rs:currentPage=' + 1
+              + "&rs:pageSize=" + 100
+              + "&rs:startDate=" + startDate
+              + "&rs:endDate=" + endDate
+              , {
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                method: 'post'
+                ,
+                body: json(parts)
+              }).then(response => response.json()).then(data => {
+              console.log.apply(console, this.logger.log(data, "Data quality loaded for export csv"));
+              var qualiteStatsForExportCsvFromQualiteView = data;
+              if (!qualiteStatsForExportCsvFromQualiteView) {
+                return;
+              }
+              for (let qualite in qualiteStatsForExportCsvFromQualiteView) {
+                let refFabricant = qualite;
+                let refArticle = Object.keys(qualiteStatsForExportCsvFromQualiteView[qualite])[0];
+                let label = this.partNames[refFabricant];
+                if ((label !== undefined) && (label !== null)) {
+
+                  let qualitiesForExport = qualiteStatsForExportCsvFromQualiteView[refFabricant][refArticle];
+                  let ori = qualitiesForExport['ORI'];
+                  let ori2 = qualitiesForExport.ORI;
+
+                  //  if (qualities["ORI"] != null && qualities["ORI"]["SomQuantiteFacturee"] / achat["SomQuantiteFacturee"] > 0.2) moreThanTwenty++
+
+                  storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+                  //  ori!==undefined || ori!==null?numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'):'';
+                  storeData['ORI / Prix d\'achat moyen'] = ori !== undefined || ori !== null ? numeral(ori['AvgPrixTarif']).format('0.0') : '';
+                  let orf = qualitiesForExport['ORF'];
+                  storeData['ORF / Quantité commandée'] = '';
+                  //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)');
+                  storeData['ORF / Prix d\'achat moyen'] = orf !== undefined || orf !== null ? numeral(orf['AvgPrixTarif']).format('0.0') : '';
+                  //numeral(this.achatsQualiteStats[refFabricant][refArticle]['ORF']['AvgPrixTarif']).format('0.0)');
+                  let pqe = qualitiesForExport['PQE'];
+                  storeData['PQE / Quantité commandée'] = '';
+                  //(pqe !== null && pqe !== undefined) ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '';
+                  storeData['PQE / Prix d\'achat moyen'] = (pqe !== null && pqe !== undefined) ? numeral(pqe['AvgPrixTarif']).format('0.0') : '';
+                  dataToStore.data.push(storeData);
+                }
+              }
+              downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
+            })
           }
-          downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
         })
       })
-    }
-  };
-
-}
+    } // } else if (this.currentView === 'Qualité') {
+  } // fin exportDatatable
+}  // fin class
