@@ -4,12 +4,13 @@
   <require from="../../CSS/default/style.min.css"></require>
 
 
-  <div  style="width:100%" slot="nav-content">
+  <div style="width:100%" slot="nav-content">
     <button type="button" class="col-sm-2 btn btn-${isActive('Agrégée',currentView)}"
             click.trigger="setCurrentView('Agrégée')">Vue Agrégée
     </button>
     <button type="button" class="col-sm-2 btn btn-${isActive('Pièce',currentView)}"
-            click.trigger="setCurrentView('Pièce')" data-toggle="modal" data-target="#selectionPieceModal">
+            click.trigger="setCurrentView('Pièce')" data-toggle="modal"
+            data-target="#selectionPieceModal">
       Vue Pièce
     </button>
     <button type="button" class="col-sm-2 btn btn-${isActive('Qualité',currentView)}"
@@ -130,7 +131,7 @@
             <div class="row">
               <div class="col-lg-4" style="white-space: nowrap">Minimum</div>
               <input type="number" class="col-lg-8" id="inlineFormInput" placeholder="Quantité"
-                     value.bind="preSelected.minQuantity"  min="0">
+                     value.bind="preSelected.minQuantity" min="0">
             </div>
           </div>
         </div>
@@ -154,12 +155,13 @@
             <div id="mainDiagram1" ref="mainDiagram1" style="width: 100%; height:100%"></div>
           </div>
           <div class="col-sm-3">
-            <div class="jumbotron" if.bind="ecartMoyen>0 && currentView=='Agrégée'" >
+            <div class="jumbotron" if.bind="ecartMoyen>0 && currentView=='Agrégée'">
               <center>
-                <p class="lead" style="font-size:19px" >Ecart moyen au prix moyen d'achat groupe</p>
-                <h5 class="display-6" style="font-size:19px" >${ecartMoyen | numberFormat:'0.00 %'} </h5>
-                <p class="lead"  style="font-size:19px">Manque à gagner crédible</p>
-                <h5 class="display-6" style="font-size:19px" >${totalMagCredible} &euro; </h5>
+                <p class="lead" style="font-size:19px">Ecart moyen au prix moyen d'achat groupe</p>
+                <h5 class="display-6" style="font-size:19px">${ecartMoyen | numberFormat:'0.00
+                  %'} </h5>
+                <p class="lead" style="font-size:19px">Manque à gagner crédible</p>
+                <h5 class="display-6" style="font-size:19px">${totalMagCredible} &euro; </h5>
               </center>
             </div>
 
@@ -182,11 +184,11 @@
 
         <div>
 
-          <td style="font-size: 90%; width: 100%" >
+          <td style="font-size: 90%; width: 100%">
             <table class="table table-hover">
               <thead class="thead-dark">
               <tr>
-                <th colspan="6"  style="background-color: transparent; border:0px; padding:0px">
+                <th colspan="6" style="background-color: transparent; border:0px; padding:0px">
                   <div show.bind="filter.part==null" if.bind="currentView!='Qualité'">
                     <nav aria-label="Page navigation example">
                       <ul class="pagination" style="margin-bottom:0px"
@@ -359,7 +361,7 @@
                 </th>
                 <th scope="col" if.bind="currentView=='Qualité'">PQE <br/>Prix d'achat moyen (€)
                 </th>
-                <th style="background:white; border:1px white" if.bind="currentView!='Pièce'" >
+                <th style="background:white; border:1px white" if.bind="currentView!='Pièce'">
                   <div>
                     <button class="btn btn-primary small-button" style="margin:auto " width="20px"
                             click.trigger="exportDatatable()">Exporter
@@ -456,83 +458,81 @@
                 <td/>
                 <td/>
                 <td/>
-                <th scope="col"><label if.bind="sumTotalExpenditure && sumTotalExpenditure!='0'" >${sumTotalExpenditure} &euro;</label></th>
+                <th scope="col"><label if.bind="sumTotalExpenditure && sumTotalExpenditure!='0'">${sumTotalExpenditure}
+                  &euro;</label></th>
                 <td/>
                 <td/>
-                <th scope="col"><label if.bind="sumMAGC && sumMAGC!='0'">${sumMAGC} &euro;</label></th>
+                <th scope="col"><label if.bind="sumMAGC && sumMAGC!='0'">${sumMAGC} &euro;</label>
+                </th>
                 <td/>
                 <td/>
                 <td/>
-                <th scope="col"><label if.bind="sumMAGT && sumMAGT!='0'" >${sumMAGT} &euro;</label></th>
+                <th scope="col"><label if.bind="sumMAGT && sumMAGT!='0'">${sumMAGT} &euro;</label>
+                </th>
                 </td>
               </tr>
               </tbody>
             </table>
-          </div>
-
-        </div>
-        <div show.bind="filter.part!=null">
-
-          <H5>D&eacute;tails des commandes</H5>
         </div>
 
-        <part-view show.bind="filter.part!=null" filter.bind="filter"></part-view>
+      </div>
+      <div show.bind="filter.part!=null">
 
-        <div class="modal fade" id="selectionPieceModal" tabindex="-1" role="dialog"
-             aria-labelledby="selectionPieceModalLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="selectionPieceModalLabel">Sélection
-                  ${currentSuggestionTitle}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
+        <H5>D&eacute;tails des commandes</H5>
+      </div>
+
+      <part-view show.bind="filter.part!=null" filter.bind="filter"></part-view>
+
+      <!-- fenêtre modale relative à la sélection des pièces -->
+      <div class="modal fade" id="selectionPieceModal" tabindex="-1" role="dialog"
+           aria-labelledby="selectionPieceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="selectionPieceModalLabel">Sélection
+                ${currentSuggestionTitle}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div show.bind="currentSuggestionType!='ets'" class="modal-body" style="width:600px;" >
+              <div class="input-group mb-3"   style="width:550px;">
+                <input type="text" class="form-control" value.bind="suggestValue"
+                       placeholder.bind="currentSuggestionLabel" aria-label="Recipient's username"
+                       aria-describedby="basic-addon2" style="width:500px;" >
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button"
+                          click.trigger="loadSuggestions(suggestValue,10)">Recherche
+                  </button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                          click.trigger="validateModal()">Valider
+                  </button>
+                </div>
               </div>
-              <div show.bind="currentSuggestionType!='ets'" class="modal-body">
-                <!--div class="modal-body"-->
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" value.bind="suggestValue"
-                         placeholder.bind="currentSuggestionLabel" aria-label="Recipient's username"
-                         aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button"
-                            click.trigger="loadSuggestions(suggestValue,10)">Recherche
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            click.trigger="validateModal()">Valider
-                    </button>
+              <div class="container">
+                <div class="col-sm">
+                  <div class="col-sm" style="margin-bottom: 10px"
+                       show.bind="preSelectedPart!=null">
+                    <div>Sélectionnée :</div>
+                    <div>${preSelectedPart.name} (${preSelectedPart.id})</div>
+                  </div>
+                  <div class="list-group">
+                    <a href="#" repeat.for="suggestion of suggestions"
+                       class="list-group-item list-group-item-action"
+                       click.trigger="preSelectPart(suggestion.id, suggestion.name)">aaaa${suggestion.name}
+                      (${suggestion.id})</a>
                   </div>
                 </div>
-                <div class="container">
-                  <div class="col-sm">
-                    <div class="col-sm" style="margin-bottom: 10px"
-                         show.bind="preSelectedPart!=null">
-                      <div>Sélectionnée :</div>
-                      <div>${preSelectedPart.name} (${preSelectedPart.id})</div>
-                    </div>
-                    <div class="list-group">
-                      <a href="#" repeat.for="suggestion of suggestions"
-                         class="list-group-item list-group-item-action"
-                         click.trigger="preSelectPart(suggestion.id, suggestion.name)">${suggestion.name}
-                        (${suggestion.id})</a>
-                    </div>
-                  </div>
-                </div>
               </div>
-              <div show.bind="currentSuggestionType=='ets'" class="modal-body">
-                <div>
-
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                        click.trigger="validateModal()">Valider
-                </button>
-              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                      click.trigger="validateModal()">Valider
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
       <!-- fenêtre modale des filiales -->
       <div class="modal fade" id="filialeModal" tabindex="-1" role="dialog"
@@ -545,23 +545,6 @@
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
-            </div>
-            <div show.bind="currentSuggestionType!='ets'" class="modal-body">
-              <div class="container">
-                <div class="col-sm">
-                  <div class="col-sm" style="margin-bottom: 10px"
-                       show.bind="preSelectedPart!=null">
-                    <div>Sélectionnée :</div>
-                    <div>${preSelectedPart.name} (${preSelectedPart.id})</div>
-                  </div>
-                  <div class="list-group">
-                    <a href="#" repeat.for="suggestion of suggestions"
-                       class="list-group-item list-group-item-action"
-                       click.trigger="preSelectPart(suggestion.id, suggestion.name)">${suggestion.name}
-                      (${suggestion.id})</a>
-                  </div>
-                </div>
-              </div>
             </div>
             <div show.bind="currentSuggestionType=='ets'" class="modal-body">
               <div>
