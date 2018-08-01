@@ -536,8 +536,8 @@ export class HomeComponent {
     }
     if (suggestType == "part") {
       this.currentSuggestionType = "part";
-      this.currentSuggestionLabel = "Libellé ou référence fabricant de la pièce";
-      this.currentSuggestionTitle = "Pièces(s)";
+      this.currentSuggestionLabel = "Libellé ou Réf. Fabricant ou Réf. Kapp de la pièce";
+      this.currentSuggestionTitle = "Pièce(s)";
     }
   };
 
@@ -997,7 +997,6 @@ export class HomeComponent {
           if (achats == null || !achats.length) {
             return;
           }
-
           this.http.fetch('/v1/resources/qualityStats?rs:part=' + ets
             + '&rs:currentPage=' + 1
             + "&rs:pageSize=" + 100
@@ -1015,9 +1014,7 @@ export class HomeComponent {
             if (!qualiteStats) {
               return;
             }
-
             for (let achat in achats) {
-
               let refFabricant = achats[achat]['main.LignesCommande.RefFabricant'];
               let refArticle = achats[achat]['main.LignesCommande.Article'];
               if (qualiteStats[refFabricant] && this.showQualityLine(achats[achat], qualiteStats)) {
@@ -1051,10 +1048,8 @@ export class HomeComponent {
             } // boucle for achats
             downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
           })
-
         })
       })
     } // } else if (this.currentView === 'Qualité') {
-
   } // fin exportDatatable
 }  // fin class

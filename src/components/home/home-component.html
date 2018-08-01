@@ -4,7 +4,7 @@
   <require from="../../CSS/default/style.min.css"></require>
 
 
-  <div classe="row" style="width:100%" slot="nav-content">
+  <div class="row" style="width:100%" slot="nav-content">
     <button type="button" class="col-sm-2 btn btn-${isActive('Agrégée',currentView)}"
             click.trigger="setCurrentView('Agrégée')">Vue Agrégée
     </button>
@@ -275,6 +275,7 @@
                         crédible sur la période sélectionnée.
                       </div>
                     </div>
+                  </div>
                 </th>
                 <th scope="col" if.bind="currentView!='Qualité'"><a href="#"
                                                                     click.trigger="setSortField('MAGPMC')"
