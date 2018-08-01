@@ -195,6 +195,7 @@ export class HomeComponent {
 
   validateFilter() {
     console.log.apply(console, this.logger.log(null, "Filtrage validated"));
+    debugger
     this.filter = this.preSelected;
     this.refresh();
   };
@@ -284,6 +285,7 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDateFromFilter();
     const endDate = this.getEndDateFromFilter();
+    debugger
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
@@ -503,7 +505,6 @@ export class HomeComponent {
   };
 
   loadParts(filter, limit) {
-    let toto = '/v1/resources/part?rs:filter=' + filter;
     let promise = this.http.fetch('/v1/resources/part?rs:filter=' + filter, {
       headers: {
         'Content-Type': 'application/json'
@@ -699,11 +700,12 @@ export class HomeComponent {
     }
   };
 
-
-  preSelectPart(partRef, name) {
-    this.preSelectedPart = {id: partRef, name: name};
+  validatePieceModal(partRef, name) {
+      this.preSelected.part == null;
+      this.preSelectedPart = {id: partRef, name: name};
+      this.preSelected.part = this.preSelectedPart;
+      this.validateFilter();
   };
-
 
   loadSuggestions(filter, limit) {
     if (this.currentSuggestionType == "ets")
