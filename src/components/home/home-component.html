@@ -449,13 +449,20 @@
                 </th>
 
               </tr>
-              <tr>
+              <tr if.bind="currentView!='Pièce'">
                 <td/>
                 <td/>
                 <td/>
                 <td/>
-                <th scope="col"><label if.bind="currentView=='Agrégée'">${sumTotalExpenditure} &euro;</label></th>
-                <th scope="col"><label  if.bind="currentView=='Qualité'" > La somme Qualité  ${currentView}</label></th>
+                <td/>
+                <th scope="col"><label if.bind="sumTotalExpenditure && sumTotalExpenditure!='0'" >${sumTotalExpenditure} &euro;</label></th>
+                <td/>
+                <td/>
+                <th scope="col"><label if.bind="sumMAGC && sumMAGC!='0'">${sumMAGC} &euro;</label></th>
+                <td/>
+                <td/>
+                <td/>
+                <th scope="col"><label if.bind="sumMAGT && sumMAGT!='0'" >${sumMAGT} &euro;</label></th>
                 </td>
               </tr>
               </tbody>

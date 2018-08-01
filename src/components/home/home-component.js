@@ -65,11 +65,13 @@ export class HomeComponent {
   @bindable state = 0;
   achatsStatsForExport = [];
   @bindable totalMagCredible = '0';
-  @bindable sumTotalExpenditure = 0;
-/*    @bindable totalMagCredible =
-  @bindable totalMagCredible =
-  @bindable totalMagCredible =
-  @bindable totalMagCredible =*/
+  @bindable sumTotalExpenditure = '';
+  @bindable sumMAGC = '';
+  @bindable sumMAGT = '';
+  /*    @bindable totalMagCredible =
+   @bindable totalMagCredible =
+   @bindable totalMagCredible =
+   @bindable totalMagCredible =*/
 
   /* ******************************************************************************************************************* */
   /* ***************************************************** General ***************************************************** */
@@ -274,7 +276,9 @@ export class HomeComponent {
     this.achatsStatsReady = false;
     this.totalMagCredible = '0';
     this.config.totalItems = 0;
-    this.sumTotalExpenditure = 0;
+    this.sumTotalExpenditure = '';
+    this.sumMAGC = '';
+    this.sumMAGT = '';
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id;
     }).join("") : ""
@@ -298,8 +302,17 @@ export class HomeComponent {
       this.currentUser = data.currentUser;
       this.achatsStats = data.results;
       const firstAchatStats = this.achatsStats[0];
-      this.achatsStats.map(item => this.sumTotalExpenditure +=item.SomMontantCalc );
-      this.sumTotalExpenditure = numeral(this.sumTotalExpenditure).format('0,0').replace(/,/g, ' ')
+      let sumTotalExpenditureNumberFormat = 0;
+      let sumMAGCNumberFormat = 0;
+      let sumMAGTNumberFormat = 0;
+      this.achatsStats.map((item) => {
+        sumTotalExpenditureNumberFormat += item.SomMontantCalc;
+        sumMAGCNumberFormat += item.MAGPMC;
+        sumMAGTNumberFormat += item.MAGPMT;
+      })
+      this.sumTotalExpenditure = numeral(sumTotalExpenditureNumberFormat).format('0,0').replace(/,/g, ' ')
+      this.sumMAGC = numeral(sumMAGCNumberFormat).format('0,0').replace(/,/g, ' ')
+      this.sumMAGT = numeral(sumMAGTNumberFormat).format('0,0').replace(/,/g, ' ')
       const totalMagCredibleNumberFormat = firstAchatStats && firstAchatStats.MAGPMC && firstAchatStats.MAGPMCCUMUL ? (firstAchatStats.MAGPMC / firstAchatStats.MAGPMCCUMUL) : 0;
       this.totalMagCredible = numeral(totalMagCredibleNumberFormat).format('0,0').replace(/,/g, ' ')
       this.config.totalItems = data.totalItems;
@@ -319,6 +332,9 @@ export class HomeComponent {
   loadQualityStats() {
     this.achatsQualiteStats = [];
     this.achatsQualiteStatsReady = false;
+    this.sumTotalExpenditure = '';
+    this.sumMAGC = '';
+    this.sumMAGT = '';
     let parts = {
       parts: this.achatsStats.map(function (item) {
         return item["main.LignesCommande.RefFabricant"]
@@ -342,9 +358,29 @@ export class HomeComponent {
         body: json(parts)
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data quality loaded"));
-      debugger
+      
       this.achatsQualiteStats = data;
-      for (var achat of this.achatsStats) {
+      let sumTotalExpenditureNumberFormat = 0;
+      let sumMAGCNumberFormat = 0;
+      let sumMAGTNumberFormat = 0;
+      for (let achat in this.achatsStats) {
+
+        let refFabricant = this.achatsStats[achat]['main.LignesCommande.RefFabricant'];
+        let refArticle = this.achatsStats[achat]['main.LignesCommande.Article'];
+        if (this.achatsQualiteStats [refFabricant] && this.showQualityLine(this.achatsStats[achat], this.achatsQualiteStats)) {
+          let qualiteForExport = this.achatsQualiteStats [refFabricant][refArticle];
+
+          if (qualiteForExport) {
+            let label = this.partNames[refFabricant];
+
+            if (label) {
+              sumTotalExpenditureNumberFormat += this.achatsStats[achat]['SomMontantCalc'];
+            }
+          }
+        }
+      }
+      this.sumTotalExpenditure = numeral(sumTotalExpenditureNumberFormat).format('0,0').replace(/,/g, ' ')
+      for (let achat of this.achatsStats) {
         achat.showQuality = this.showQualityLine(achat, this.achatsQualiteStats);
       }
       this.achatsQualiteStatsReady = true;
@@ -932,7 +968,7 @@ export class HomeComponent {
 
       })
     } else if (this.currentView === 'Qualité') {
-      debugger
+      
       let parts = {
         parts: this.achatsStats.map(function (item) {
           return item["main.LignesCommande.RefFabricant"]
@@ -940,7 +976,7 @@ export class HomeComponent {
       };
 
       var achatsStatsForExportCsvFromQualiteView = [];
-      var qualiteStats= [];
+      var qualiteStats = [];
       this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
         + '&rs:currentPage=' + 1
         + "&rs:pageSize=" + 100
@@ -975,7 +1011,7 @@ export class HomeComponent {
               ,
               body: json(parts)
             }).then(qualityResponse => qualityResponse.json()).then(qualityData => {
-            qualiteStats=qualityData;
+            qualiteStats = qualityData;
             if (!qualiteStats) {
               return;
             }
@@ -1003,7 +1039,7 @@ export class HomeComponent {
                     storeData['ORI / Quantité commandée'] = ori ? numeral(ori['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '0.0 %';
                     storeData['ORI / Prix d\'achat moyen'] = ori ? numeral(ori['AvgPrixTarif']).format('0.0') : '0.0';
                     let orf = qualiteForExport['ORF'];
-                    storeData['ORF / Quantité commandée'] = orf ? numeral(orf['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)'): '0.0 %';
+                    storeData['ORF / Quantité commandée'] = orf ? numeral(orf['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '0.0 %';
                     storeData['ORF / Prix d\'achat moyen'] = orf ? numeral(orf['AvgPrixTarif']).format('0.0') : '0.0';
                     let pqe = qualiteForExport['PQE'];
                     storeData['PQE / Quantité commandée'] = pqe ? numeral(pqe['SomQuantiteFacturee'] / achats[achat]['SomQuantiteFacturee']).format('(0.0 %)') : '0.0 %';
@@ -1012,7 +1048,7 @@ export class HomeComponent {
                   }
                 }
               }
-             } // boucle for achats
+            } // boucle for achats
             downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
           })
 
