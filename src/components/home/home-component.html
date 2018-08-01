@@ -4,12 +4,12 @@
   <require from="../../CSS/default/style.min.css"></require>
 
 
-  <div class="row" style="width:100%" slot="nav-content">
+  <div  style="width:100%" slot="nav-content">
     <button type="button" class="col-sm-2 btn btn-${isActive('Agrégée',currentView)}"
             click.trigger="setCurrentView('Agrégée')">Vue Agrégée
     </button>
     <button type="button" class="col-sm-2 btn btn-${isActive('Pièce',currentView)}"
-            click.trigger="setCurrentView('Pièce')" data-toggle="modal" data-target="#filialeModal">
+            click.trigger="setCurrentView('Pièce')" data-toggle="modal" data-target="#selectionPieceModal">
       Vue Pièce
     </button>
     <button type="button" class="col-sm-2 btn btn-${isActive('Qualité',currentView)}"
@@ -31,7 +31,7 @@
               <div class="col-lg-6" style="white-space: nowrap">Filiale(s)</div>
               <div class="col-lg-6">
                 <button class="btn btn-primary very-small-button" style="width:100%"
-                        data-toggle="modal" data-target="#filialeModal"
+                        data-toggle="modal" data-target="#selectionPieceModal"
                         click.trigger="setCurrentSuggestionType('ets')">Modifier
                 </button>
               </div>
@@ -55,7 +55,7 @@
               <div class="col-lg-6" style="white-space: nowrap">Pi&egrave;ce</div>
               <div class="col-lg-6">
                 <button class="btn btn-primary very-small-button" style="width:100%"
-                        data-toggle="modal" data-target="#filialeModal"
+                        data-toggle="modal" data-target="#selectionPieceModal"
                         click.trigger="setCurrentSuggestionType('part')">Modifier
                 </button>
               </div>
@@ -478,12 +478,12 @@
 
         <part-view show.bind="filter.part!=null" filter.bind="filter"></part-view>
 
-        <div class="modal fade" id="filialeModal" tabindex="-1" role="dialog"
-             aria-labelledby="filialeModalLabel" aria-hidden="true">
+        <div class="modal fade" id="selectionPieceModal" tabindex="-1" role="dialog"
+             aria-labelledby="selectionPieceModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="filialeModalLabel">Sélection
+                <h5 class="modal-title" id="selectionPieceModalLabel">Sélection
                   ${currentSuggestionTitle}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
