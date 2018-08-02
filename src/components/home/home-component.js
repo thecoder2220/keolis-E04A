@@ -1057,37 +1057,16 @@ export class HomeComponent {
   } // fin exportDatatable
 
 
-  downloadLocalFile() {
-
-    /*var xhr = new XMLHttpRequest();
-    xhr.open('GET', '../static/toto.xlsx', true);
-    xhr.responseType = 'blob';
-    xhr.onload = function(e) {
-      if (this.status == 200) {
-        // Note: .response instead of .responseText
-        var reader = new FileReader();
-        var blob = new Blob([this.response], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-        reader.readAsDataURL(blob);
-        reader.onloadend = function (e) {
-          window.open(reader.result, 'Excel', 'width=20,height=10,toolbar=0,menubar=0,scrollbars=no', '_blank');
-        }
-      }
-    };
-
-    xhr.send();*/
-
+  downloadSubsidiaryMAGFile() {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '../static/toto.xlsx', true);
-
+    xhr.open('GET', '../static/Extract_data.xlsx', true);
     xhr.responseType = 'arraybuffer';
-
     xhr.onload = function(e) {
       if (this.status == 200) {
         var uInt8Array = new Uint8Array(this.response);
         var i = uInt8Array.length;
         var binaryString = new Array(i);
-        while (i--)
-        {
+        while (i--) {
           binaryString[i] = String.fromCharCode(uInt8Array[i]);
         }
         var data = binaryString.join('');
@@ -1097,14 +1076,12 @@ export class HomeComponent {
         let dataToDownload = encodeURI(base64B);
         let link = document.createElement('a');
         link.setAttribute('href', dataToDownload);
-        link.setAttribute('download', 'toto2.xlsx');
+        link.setAttribute('download', 'Extract_data.xlsx');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
       }
     };
-
     xhr.send();
   }
 
