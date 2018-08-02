@@ -26,7 +26,7 @@ export const convertArrayOfObjectsToCSV = (args) => {
 }
 
 
-export const downloadFile = (dataToStore, filename = 'export.csv') => {
+export const downloadCsvFile = (dataToStore, filename = 'export.csv') => {
   var csv = convertArrayOfObjectsToCSV(dataToStore);
   if (csv == null) return;
   if (!csv.match(/^data:text\/csv/i)) {
@@ -68,3 +68,7 @@ export const formatDate =  (date) => {
 }
 
 //export const adding=(a, b) => { return a + b; }
+
+export const upload = () => {
+
+}

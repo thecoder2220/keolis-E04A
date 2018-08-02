@@ -7,7 +7,7 @@ import * as Echarts from 'echarts'
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jquery-ui';
-import {downloadFile} from '../../utils'
+import {downloadCsvFile} from '../../utils'
 import numeral from 'numeral';
 
 @inject(HttpClient, Echarts, EventAggregator)
@@ -416,7 +416,7 @@ export class PartView {
           dataToStore.data.push(storeData);
 
         }
-        downloadFile(dataToStore, 'Détails des commandes.csv');
+        downloadCsvFile(dataToStore, 'Détails des commandes.csv');
       })
     })
   }

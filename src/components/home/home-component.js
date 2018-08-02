@@ -8,7 +8,7 @@ import {EventAggregator} from 'aurelia-event-aggregator';
 import {PLATFORM} from 'aurelia-pal';
 import 'jstree';
 import numeral from 'numeral';
-import {downloadFile, formatDate} from '../../utils'
+import {downloadCsvFile, formatDate} from '../../utils'
 
 Date.prototype.addDays = function (days) {
   var date = new Date(this.valueOf());
@@ -195,7 +195,6 @@ export class HomeComponent {
 
   validateFilter() {
     console.log.apply(console, this.logger.log(null, "Filtrage validated"));
-    debugger
     this.filter = this.preSelected;
     this.refresh();
   };
@@ -285,7 +284,6 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDateFromFilter();
     const endDate = this.getEndDateFromFilter();
-    debugger
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
     this.http.fetch('/v1/resources/achatsStats2?rs:default=' + part + ets
       + '&rs:currentPage=' + this.currentPage
@@ -360,7 +358,7 @@ export class HomeComponent {
         body: json(parts)
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data quality loaded"));
-      
+
       this.achatsQualiteStats = data;
       let sumTotalExpenditureNumberFormat = 0;
       let sumMAGCNumberFormat = 0;
@@ -701,10 +699,10 @@ export class HomeComponent {
   };
 
   validatePieceModal(partRef, name) {
-      this.preSelected.part == null;
-      this.preSelectedPart = {id: partRef, name: name};
-      this.preSelected.part = this.preSelectedPart;
-      this.validateFilter();
+    this.preSelected.part == null;
+    this.preSelectedPart = {id: partRef, name: name};
+    this.preSelected.part = this.preSelectedPart;
+    this.validateFilter();
   };
 
   loadSuggestions(filter, limit) {
@@ -908,6 +906,9 @@ export class HomeComponent {
     })
   };
 
+  exportUserSubsidiaryMAGData() {
+
+  };
 
   exportDatatable() {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
@@ -965,12 +966,12 @@ export class HomeComponent {
               dataToStore.data.push(storeData);
             }
           }
-          downloadFile(dataToStore, 'Analyse par pièce - Vue Agrégée.csv');
+          downloadCsvFile(dataToStore, 'Analyse par pièce - Vue Agrégée.csv');
         })
 
       })
     } else if (this.currentView === 'Qualité') {
-      
+
       let parts = {
         parts: this.achatsStats.map(function (item) {
           return item["main.LignesCommande.RefFabricant"]
@@ -1048,10 +1049,116 @@ export class HomeComponent {
                 }
               }
             } // boucle for achats
-            downloadFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
+            downloadCsvFile(dataToStore, 'Analyse par pièce - Vue Qualité.csv');
           })
         })
       })
     } // } else if (this.currentView === 'Qualité') {
   } // fin exportDatatable
+
+
+  downloadLocalFile() {
+
+    /*var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../static/toto.xlsx', true);
+    xhr.responseType = 'blob';
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+        // Note: .response instead of .responseText
+        var reader = new FileReader();
+        var blob = new Blob([this.response], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        reader.readAsDataURL(blob);
+        reader.onloadend = function (e) {
+          window.open(reader.result, 'Excel', 'width=20,height=10,toolbar=0,menubar=0,scrollbars=no', '_blank');
+        }
+      }
+    };
+
+    xhr.send();*/
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '../static/toto.xlsx', true);
+
+    xhr.responseType = 'arraybuffer';
+
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+        var uInt8Array = new Uint8Array(this.response);
+        var i = uInt8Array.length;
+        var binaryString = new Array(i);
+        while (i--)
+        {
+          binaryString[i] = String.fromCharCode(uInt8Array[i]);
+        }
+        var data = binaryString.join('');
+
+        var base64 = window.btoa(data);
+        var base64B = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + base64 ;
+        let dataToDownload = encodeURI(base64B);
+        let link = document.createElement('a');
+        link.setAttribute('href', dataToDownload);
+        link.setAttribute('download', 'toto2.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+      }
+    };
+
+    xhr.send();
+  }
+
+
 }  // fin class
+
+
+
+
+
+
+/* var reader = new FileReader();
+ var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+ reader.readAsDataURL(blob);
+ reader.onloadend = function (e) {
+   window.open(reader.result, 'Excel', 'width=20,height=10,toolbar=0,menubar=0,scrollbars=no', '_blank');
+ }  */
+
+
+
+
+
+
+
+
+
+    /*
+
+    $.ajax({
+      // url: "../src/resources/Consolidation_filiales.csv",        + '\ufeff'
+      //url: "../static/Extract_data.xlsx",
+      url: "../static/toto.xlsx",
+      type: "GET",
+      dataType: "binary",
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      processData: false,
+
+      success: function (xlsx) {
+        if (!xlsx.match(/^data:application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/i)) {
+          xlsx = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8,' + xlsx;
+        }
+        let data = encodeURI(xlsx);
+        let link = document.createElement('a');
+        link.setAttribute('href', data);
+        link.setAttribute('download', 'Extract_data.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      },
+      error: function (xhr, ajaxOptions, thrownError) {
+        console.log(thrownError);
+      }
+    });   */
+
