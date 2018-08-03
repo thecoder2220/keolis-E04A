@@ -743,6 +743,12 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDateFromFilter();
     const endDate = this.getEndDateFromFilter();
+    debugger
+    const toto ='/v1/resources/ecartAchatMoyen?rs:part=' + ets
+      + '&rs:currentPage=' + this.currentPage
+      + "&rs:pageSize=" + this.config.pageSize
+      + "&rs:startDate=" + startDate
+      + "&rs:endDate=" + endDate
     this.http.fetch('/v1/resources/ecartAchatMoyen?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize
@@ -755,6 +761,7 @@ export class HomeComponent {
         method: 'get'
       }).then(response => response.json()).then(data => {
       console.log.apply(console, this.logger.log(data, "Data ecart moyen loaded"));
+
       this.ecartMoyen = data.ratio;
     })
   };
@@ -1085,57 +1092,4 @@ export class HomeComponent {
     xhr.send();
   }
 
-
 }  // fin class
-
-
-
-
-
-
-/* var reader = new FileReader();
- var blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
- reader.readAsDataURL(blob);
- reader.onloadend = function (e) {
-   window.open(reader.result, 'Excel', 'width=20,height=10,toolbar=0,menubar=0,scrollbars=no', '_blank');
- }  */
-
-
-
-
-
-
-
-
-
-    /*
-
-    $.ajax({
-      // url: "../src/resources/Consolidation_filiales.csv",        + '\ufeff'
-      //url: "../static/Extract_data.xlsx",
-      url: "../static/toto.xlsx",
-      type: "GET",
-      dataType: "binary",
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      processData: false,
-
-      success: function (xlsx) {
-        if (!xlsx.match(/^data:application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet/i)) {
-          xlsx = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8,' + xlsx;
-        }
-        let data = encodeURI(xlsx);
-        let link = document.createElement('a');
-        link.setAttribute('href', data);
-        link.setAttribute('download', 'Extract_data.xlsx');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      },
-      error: function (xhr, ajaxOptions, thrownError) {
-        console.log(thrownError);
-      }
-    });   */
-
