@@ -194,18 +194,18 @@
   <!-- Modal -->
   <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document" >
-      <div class="modal-content"  style="width:1000px;">
+      <div class="modal-content"  style="width:1260px;left:-200px">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">Entr&eacute;es du catalogue</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="width:100%;padding: 0 1rem;">
           <small>
-            <table class="table table-responsive-sm table-hover">
-              <thead>
-              <tr>
+            <table class="table" style="width:100%;display:table;">
+              <thead id="thead-catalog-entry">
+              <tr id="thead-tr-catalog-entry" >
                 <th scope="col">Libellé</th>
                 <th scope="col">Fournisseur</th>
                 <th scope="col">Constructeur</th>
@@ -218,8 +218,8 @@
               </tr>
               </thead>
 
-              <tbody>
-              <tr repeat.for="entry of catalogEntries">
+              <tbody  id="tbody-catalog-entry" >
+              <tr id="tbody-tr-catalog-entry" repeat.for="entry of catalogEntries" >
 
                 <td title.bind="entry['CSStooltip']" scope="col" class="${entry['CSScell'] || ''}"><p
                   title.bind="entry['INTSBART']">${entry['INTSBART'].substring(0,15)}</p></td>

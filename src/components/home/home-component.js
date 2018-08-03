@@ -503,6 +503,8 @@ export class HomeComponent {
   };
 
   loadParts(filter, limit) {
+    debugger
+    let toto='/v1/resources/part?rs:filter=' + filter
     let promise = this.http.fetch('/v1/resources/part?rs:filter=' + filter, {
       headers: {
         'Content-Type': 'application/json'
@@ -513,7 +515,9 @@ export class HomeComponent {
         'dataLoaded': data,
         'filters': filter
       }, "Data pieces loaded"));
-      this.suggestions = data
+     // this.suggestions = data
+      this.suggestions = [{"id":"A0242509703", "name":"DISQUE D'EMBRAYAGE"}, {"id":"A0072501504", "name":"MECANISME EMBRAYAGE"}, {"id":"A0022506515", "name":"BUTEE EMBRAYAGE"}, {"id":"5801311227", "name":"CYL D'ASSIST.EMBRA"}, {"id":"2996101", "name":"KIT EMBRAYAGE ARWAY, CROSSWAY*"}, {"id":"5006172148", "name":"BUTEE EMBRAYAGE ILIADE 2900N"}, {"id":"5001836428", "name":"ES KIT EMBRAYAGE TRACER(AP.09/92) ES"}, {"id":"A0012959506", "name":"EMETTEUR EMBRAYAGE"}, {"id":"A0072509504", "name":"MECANISME D'EMBRAYAGE"}, {"id":"A9702500613", "name":"FOURCHETTE D' EMBRAYAGE"},
+          {"id":"A9424230112", "name":"DISQUE DE FREIN"}, {"id":"A0064201020", "name":"PLAQUETTE DE FREIN (JEU)"}, {"id":"A0154205318", "name":"CYLINDRE DE FREIN DROIT"}, {"id":"503142454", "name":"KIT PLAQ. FREIN AV CITELIS+TU"}, {"id":"A0154205218", "name":"CYLINDRE DE FREIN GAUCHE"}, {"id":"A9434210412", "name":"DISQUE FREIN AV"}, {"id":"503128324", "name":"CYLINDRE DE FREIN GX117 AGORA LINE"}, {"id":"2996068", "name":"KIT PLAQ. FREIN AV CITELIS+TU"}, {"id":"5010403132", "name":"CYLINDRE DE FREIN GX117 AGORA LINE"}, {"id":"A0084204824", "name":"CYLINDRE DE FREIN"}]
     })
     return promise;
   };
@@ -743,12 +747,6 @@ export class HomeComponent {
     }).join("") : ""
     const startDate = this.getStartDateFromFilter();
     const endDate = this.getEndDateFromFilter();
-    debugger
-    const toto ='/v1/resources/ecartAchatMoyen?rs:part=' + ets
-      + '&rs:currentPage=' + this.currentPage
-      + "&rs:pageSize=" + this.config.pageSize
-      + "&rs:startDate=" + startDate
-      + "&rs:endDate=" + endDate
     this.http.fetch('/v1/resources/ecartAchatMoyen?rs:part=' + ets
       + '&rs:currentPage=' + this.currentPage
       + "&rs:pageSize=" + this.config.pageSize

@@ -486,7 +486,7 @@
       <!-- fenêtre modale relative à la sélection des pièces -->
       <div class="modal fade" id="selectionPieceModal" tabindex="-1" role="dialog"
            aria-labelledby="selectionPieceModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document" style="margin-left:auto;margin-right:auto;">
+        <div class="modal-dialog" role="document" style="left:-14px">
           <div class="modal-content"  style="width:600px;">
             <div class="modal-header" >
               <h5 class="modal-title" id="selectionPieceModalLabel">Sélection
@@ -507,8 +507,8 @@
                 </div>
               </div>
               <div class="container">
-                <div class="col-sm">
-                  <div class="list-group">
+                <div class="col-sm" styme=" min-height: 0;">
+                  <div class="list-group list-scrollable" >
                     <a href="#" repeat.for="suggestion of suggestions"
                        class="list-group-item list-group-item-action" data-dismiss="modal"
                        click.trigger="validatePieceModal(suggestion.id, suggestion.name)">${suggestion.name}
