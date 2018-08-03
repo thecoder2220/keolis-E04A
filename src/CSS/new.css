@@ -50,7 +50,7 @@ small {
 
 #tbody-catalog-entry {
   display: block;
-  max-height:495px;
+  max-height:485px;
   overflow: auto;
 }
 

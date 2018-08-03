@@ -50,7 +50,6 @@ export class HomeComponent {
     "part": null,
     "startDate": {'month': '01', 'year': '2017'},
     "endDate": {'month': '12', 'year': '2017'},
-    "endDateForGraph": {'month': '12', 'year': '2017'},
     "minQuantity": 0
   };
   @bindable preSelected = {
@@ -58,6 +57,7 @@ export class HomeComponent {
     "part": null,
     "startDate": {'month': '01', 'year': '2017'},
     "endDate": {'month': '12', 'year': '2017'},
+    "startDateForGraph": {'month': '12', 'year': '2016'},
     "endDateForGraph": {'month': '12', 'year': '2017'},
     "minQuantity": 0
   };
@@ -170,7 +170,7 @@ export class HomeComponent {
     }
     this.loadAchatsStats();
     this.loadEcartMoyen();
-    this.loadYearStats();
+    //this.loadYearStats();
   };
 
 
@@ -241,7 +241,7 @@ export class HomeComponent {
       endMonth = startMonth + 1;
       endYear = startYear;
     }
-
+    let endYearForGraph = endYear -1;
     let startMonthString = (startMonth + 1) > 9 ? (startMonth + 1).toString() : "0".concat(startMonth + 1);
     let endMonthString = (endMonth + 1) > 9 ? (endMonth + 1).toString() : "0".concat(endMonth + 1);
 
@@ -251,6 +251,9 @@ export class HomeComponent {
     this.preSelected.endDate.year = startYear.toString();
     this.preSelected.endDate.month = startMonthString;
     this.preSelected.endDate.day = (new Date(endYear, endMonth, 0));
+    this.preSelected.startDateForGraph.year = endYearForGraph.toString();
+    this.preSelected.startDateForGraph.month = endMonthString;
+    this.preSelected.startDateForGraph.day = "01";
     this.preSelected.endDateForGraph.year = endYear.toString();
     this.preSelected.endDateForGraph.month = endMonthString;
     this.preSelected.endDateForGraph.day = "01";
@@ -361,8 +364,6 @@ export class HomeComponent {
 
       this.achatsQualiteStats = data;
       let sumTotalExpenditureNumberFormat = 0;
-      let sumMAGCNumberFormat = 0;
-      let sumMAGTNumberFormat = 0;
       for (let achat in this.achatsStats) {
 
         let refFabricant = this.achatsStats[achat]['main.LignesCommande.RefFabricant'];
@@ -503,8 +504,6 @@ export class HomeComponent {
   };
 
   loadParts(filter, limit) {
-    debugger
-    let toto='/v1/resources/part?rs:filter=' + filter
     let promise = this.http.fetch('/v1/resources/part?rs:filter=' + filter, {
       headers: {
         'Content-Type': 'application/json'
@@ -515,9 +514,9 @@ export class HomeComponent {
         'dataLoaded': data,
         'filters': filter
       }, "Data pieces loaded"));
-     // this.suggestions = data
-      this.suggestions = [{"id":"A0242509703", "name":"DISQUE D'EMBRAYAGE"}, {"id":"A0072501504", "name":"MECANISME EMBRAYAGE"}, {"id":"A0022506515", "name":"BUTEE EMBRAYAGE"}, {"id":"5801311227", "name":"CYL D'ASSIST.EMBRA"}, {"id":"2996101", "name":"KIT EMBRAYAGE ARWAY, CROSSWAY*"}, {"id":"5006172148", "name":"BUTEE EMBRAYAGE ILIADE 2900N"}, {"id":"5001836428", "name":"ES KIT EMBRAYAGE TRACER(AP.09/92) ES"}, {"id":"A0012959506", "name":"EMETTEUR EMBRAYAGE"}, {"id":"A0072509504", "name":"MECANISME D'EMBRAYAGE"}, {"id":"A9702500613", "name":"FOURCHETTE D' EMBRAYAGE"},
-          {"id":"A9424230112", "name":"DISQUE DE FREIN"}, {"id":"A0064201020", "name":"PLAQUETTE DE FREIN (JEU)"}, {"id":"A0154205318", "name":"CYLINDRE DE FREIN DROIT"}, {"id":"503142454", "name":"KIT PLAQ. FREIN AV CITELIS+TU"}, {"id":"A0154205218", "name":"CYLINDRE DE FREIN GAUCHE"}, {"id":"A9434210412", "name":"DISQUE FREIN AV"}, {"id":"503128324", "name":"CYLINDRE DE FREIN GX117 AGORA LINE"}, {"id":"2996068", "name":"KIT PLAQ. FREIN AV CITELIS+TU"}, {"id":"5010403132", "name":"CYLINDRE DE FREIN GX117 AGORA LINE"}, {"id":"A0084204824", "name":"CYLINDRE DE FREIN"}]
+      this.suggestions = data
+      /* this.suggestions = [{"id":"A0242509703", "name":"DISQUE D'EMBRAYAGE"}, {"id":"A0072501504", "name":"MECANISME EMBRAYAGE"}, {"id":"A0022506515", "name":"BUTEE EMBRAYAGE"}, {"id":"5801311227", "name":"CYL D'ASSIST.EMBRA"}, {"id":"2996101", "name":"KIT EMBRAYAGE ARWAY, CROSSWAY*"}, {"id":"5006172148", "name":"BUTEE EMBRAYAGE ILIADE 2900N"}, {"id":"5001836428", "name":"ES KIT EMBRAYAGE TRACER(AP.09/92) ES"}, {"id":"A0012959506", "name":"EMETTEUR EMBRAYAGE"}, {"id":"A0072509504", "name":"MECANISME D'EMBRAYAGE"}, {"id":"A9702500613", "name":"FOURCHETTE D' EMBRAYAGE"},
+          {"id":"A9424230112", "name":"DISQUE DE FREIN"}, {"id":"A0064201020", "name":"PLAQUETTE DE FREIN (JEU)"}, {"id":"A0154205318", "name":"CYLINDRE DE FREIN DROIT"}, {"id":"503142454", "name":"KIT PLAQ. FREIN AV CITELIS+TU"}, {"id":"A0154205218", "name":"CYLINDRE DE FREIN GAUCHE"}, {"id":"A9434210412", "name":"DISQUE FREIN AV"}, {"id":"503128324", "name":"CYLINDRE DE FREIN GX117 AGORA LINE"}, {"id":"2996068", "name":"KIT PLAQ. FREIN AV CITELIS+TU"}, {"id":"5010403132", "name":"CYLINDRE DE FREIN GX117 AGORA LINE"}, {"id":"A0084204824", "name":"CYLINDRE DE FREIN"}]*/
     })
     return promise;
   };
@@ -786,8 +785,8 @@ export class HomeComponent {
     const ets = (this.filter.ets != null) ? this.filter.ets.map(function (item) {
       return "&rs:ets=" + item.id
     }).join("") : ""
-    const startDate = this.getStartDateFromFilter();
-    const endDate = this.getEndDateFromFilterForGraph();
+    const startDate = this.getStartDateForGraph();
+    const endDate = this.getEndDateForGraph();
     const part = this.filter.part != null ? "&rs:part=" + this.filter.part.id : "";
 
     this.diagramIsReady = false;
@@ -869,14 +868,12 @@ export class HomeComponent {
     return "";
   };
 
-  getEndDateFromFilterForGraph() {
-    if (this.filter.endDate != null) {
-      const lastDayOfFilterDate = new Date(this.filter.endDate.year, this.filter.endDate.month, 0);
-      const nextDay = lastDayOfFilterDate.addDays(1);
-      return formatDate(nextDay);
-    }
-    else
-      return "";
+  getStartDateForGraph() {
+    return this.preSelected.startDateForGraph.year + '-' + this.preSelected.startDateForGraph.month + '-'+ this.preSelected.startDateForGraph.day;
+  };
+
+  getEndDateForGraph() {
+    return this.preSelected.endDateForGraph.year + '-' + this.preSelected.endDateForGraph.month + '-'+ this.preSelected.endDateForGraph.day;
   };
 
   getSpacedNumber(nombre) {
